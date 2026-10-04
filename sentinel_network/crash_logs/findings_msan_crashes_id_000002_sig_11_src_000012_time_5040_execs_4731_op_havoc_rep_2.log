@@ -1,0 +1,6 @@
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (68 bytes received)...
+[NETWORK LOG] Command Type: 65281, Length: 48, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAbbbbbbbbbbbbbbbAAAAAAAAAAAAAxV4AAAAAAAAAAAAA
+Unrecognised telecommand type code: 65281
+Halting packet dispatch loop.
+findings/msan/crashes/id:000002,sig:11,src:000012,time:5040,execs:4731,op:havoc,rep:2

@@ -1,0 +1,55 @@
+=================================================================
+==2256822==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xedf00651 at pc 0x5fc2b902 bp 0xffd6b6a8 sp 0xffd6b27c
+WRITE of size 9 at 0xedf00651 thread T0
+    #0 0x5fc2b901 in __asan_memcpy (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5fc796aa in append_telecommand_payload /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:68:5
+    #2 0x5fc796aa in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:136:17
+    #3 0x5fc79d11 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:180:17
+    #4 0x5fc7a328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #5 0xf049bf5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #6 0xf049c097 in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5fb8b496 in _start (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x1c496) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+
+0xedf00651 is located 0 bytes after 1-byte region [0xedf00650,0xedf00651)
+allocated by thread T0 here:
+    #0 0x5fc2db71 in malloc (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5fc7948e in create_telecommand_record /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:53:27
+    #2 0x5fc7948e in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:134:19
+    #3 0x5fc79d11 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:180:17
+    #4 0x5fc7a328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #5 0xf049bf5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0xedf00380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xedf00400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xedf00480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xedf00500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xedf00580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xedf00600: fa fa fa fa fa fa fa fa fa fa[01]fa fa fa 00 04
+  0xedf00680: fa fa 00 04 fa fa 00 04 fa fa 00 04 fa fa 00 04
+  0xedf00700: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+  0xedf00780: fa fa fd fd fa fa 00 00 fa fa fa fa fa fa fa fa
+  0xedf00800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xedf00880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2256822==ABORTING
+findings/master_nosan/crashes/id:000012,sig:06,src:000023,time:30324,execs:21103,op:havoc,rep:4

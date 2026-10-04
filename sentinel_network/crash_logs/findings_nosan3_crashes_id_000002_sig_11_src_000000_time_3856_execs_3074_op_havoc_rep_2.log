@@ -1,0 +1,21 @@
+=================================================================
+==2257187==ERROR: AddressSanitizer: negative-size-param: (size=-8)
+    #0 0x61b107c4 in __asan_memcpy (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x61b5e727 in append_telecommand_payload /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:68:5
+    #2 0x61b5e727 in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:128:17
+    #3 0x61b5ed11 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:180:17
+    #4 0x61b5f328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #5 0xf60b5f5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #6 0xf60b6097 in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x61a70496 in _start (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x1c496) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+
+Address 0xf4f00018 is located in stack of thread T0 at offset 24 in frame
+    #0 0x61b5e9e7 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:154
+
+  This frame has 1 object(s):
+    [16, 1040) 'input_stream' (line 156) <== Memory access at offset 24 is inside this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: negative-size-param (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7) in __asan_memcpy
+==2257187==ABORTING
+findings/nosan3/crashes/id:000002,sig:11,src:000000,time:3856,execs:3074,op:havoc,rep:2

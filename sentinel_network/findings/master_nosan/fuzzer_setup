@@ -1,0 +1,6 @@
+# environment variables:
+AFL_CUSTOM_INFO_PROGRAM=./sentinel_network_nosan
+AFL_CUSTOM_INFO_PROGRAM_ARGV=@@
+AFL_CUSTOM_INFO_OUT=findings/net/master_nosan
+# command line:
+'afl-fuzz' '-i' 'seeds/net' '-o' 'findings/net' '-x' 'sentinel_network_dict' '-M' 'master_nosan' '--' './sentinel_network_nosan' '@@'

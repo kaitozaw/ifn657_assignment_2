@@ -1,0 +1,55 @@
+=================================================================
+==2257036==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xed500410 at pc 0x61d9dda6 bp 0xfff5ffb8 sp 0xfff5fb50
+READ of size 1017 at 0xed500410 thread T0
+    #0 0x61d9dda5 in printf_common(void*, char const*, char*) asan_interceptors.cpp.o
+    #1 0x61d9e616 in vsprintf (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x43616) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x61d9f72c in sprintf (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x61e652b8 in log_telecommand_header /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:43:5
+    #4 0x61e652b8 in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:120:5
+    #5 0x61e65d11 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:180:17
+    #6 0x61e66328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #7 0xee6a9f5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #8 0xee6aa097 in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x61d77496 in _start (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x1c496) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+
+Address 0xed500410 is located in stack of thread T0 at offset 1040 in frame
+    #0 0x61e659e7 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:154
+
+  This frame has 1 object(s):
+    [16, 1040) 'input_stream' (line 156) <== Memory access at offset 1040 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow asan_interceptors.cpp.o in printf_common(void*, char const*, char*)
+Shadow bytes around the buggy address:
+  0xed500180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xed500200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xed500280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xed500300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xed500380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xed500400: 00 00[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0xed500480: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0xed500500: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0xed500580: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0xed500600: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0xed500680: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2257036==ABORTING
+findings/nosan1/crashes/id:000015,sig:11,src:000034,time:600490,execs:435893,op:havoc,rep:13

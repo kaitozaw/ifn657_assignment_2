@@ -1,0 +1,14 @@
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (1024 bytes received)...
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: ]@A
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: ]AA
+Thruster calibration telecommand processed successfully.
+Ingesting packet frame (37 bytes received)...
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: ]AA
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: ]NA
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: 4A
+Thruster calibration telecommand processed successfully.
+findings/nosan2/crashes/id:000013,sig:06,src:000032,time:593079,execs:427548,op:havoc,rep:5

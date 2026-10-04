@@ -1,0 +1,63 @@
+=================================================================
+==2256668==ERROR: AddressSanitizer: heap-use-after-free on address 0xeb900790 at pc 0x59132be1 bp 0xfff613a8 sp 0xfff613a0
+READ of size 4 at 0xeb900790 thread T0
+    #0 0x59132be0 in release_telecommand_record /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:73:14
+    #1 0x59132be0 in emergency_command_cleanup /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:83:13
+    #2 0x59133ebb in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:189:5
+    #3 0x59134328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #4 0xedeb2f5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #5 0xedeb3097 in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x59045496 in _start (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x1c496) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+
+0xeb900790 is located 0 bytes inside of 12-byte region [0xeb900790,0xeb90079c)
+freed by thread T0 here:
+    #0 0x590e78ee in free (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x591322c1 in release_telecommand_record /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:77:5
+    #2 0x591322c1 in emergency_command_cleanup /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:83:13
+    #3 0x5913357b in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:142:13
+    #4 0x59133d11 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:180:17
+    #5 0x59134328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #6 0xedeb2f5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+
+previously allocated by thread T0 here:
+    #0 0x590e7b71 in malloc (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x59133452 in create_telecommand_record /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:49:51
+    #2 0x59133452 in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:134:19
+    #3 0x59133d11 in old_main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:180:17
+    #4 0x59134328 in main /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:198:15
+    #5 0xedeb2f5b in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:73:14 in release_telecommand_record
+Shadow bytes around the buggy address:
+  0xeb900500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900680: fa fa fa fa fa fa fa fa fa fa fd fd fa fa fd fd
+  0xeb900700: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+=>0xeb900780: fa fa[fd]fd fa fa 00 00 fa fa fa fa fa fa fa fa
+  0xeb900800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xeb900a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2256668==ABORTING
+findings/asan_ubsan/crashes/id:000012,sig:06,src:000021,time:51875,execs:30627,op:havoc,rep:2

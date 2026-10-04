@@ -1,0 +1,559 @@
+=== findings/net/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:107,execs:116,op:flip2,pos:4
+==1884978==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x587077c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x58755727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x58755d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x58756328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x587559e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000001,sig:06,src:000001,time:2893,execs:2652,op:havoc,rep:9
+==1885090==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf0500090 at pc 0x5d55980e bp 0xffdfcf28 sp 0xffdfcaf4
+    #0 0x5d55980d  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d55a72c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d6202b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5d620d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5d61ffa7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109fa7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000002,sig:06,src:000009,time:3106,execs:2829,op:havoc,rep:8
+==1885153==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf5300754 at pc 0x62ddf902 bp 0xff930a88 sp 0xff93065c
+    #0 0x62ddf901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x62e2d6aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x62e2dd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x62e2e328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x62de1b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000003,sig:04,src:000009,time:3126,execs:2834,op:havoc,rep:3
+=== findings/net/asan_ubsan/crashes/id:000004,sig:04,src:000009,time:3635,execs:3282,op:havoc,rep:1
+=== findings/net/asan_ubsan/crashes/id:000005,sig:06,src:000003,time:5910,execs:4994,op:havoc,rep:1
+==1885401==ERROR: AddressSanitizer: heap-use-after-free on address 0xeda00790 at pc 0x641ddbe1 bp 0xffdbdb68 sp 0xffdbdb60
+    #0 0x641ddbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x641deebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x641df328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xefe28f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x641928ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000006,sig:04,src:000011,time:17439,execs:13973,op:havoc,rep:4
+=== findings/net/asan_ubsan/crashes/id:000007,sig:06,src:000013,time:24706,execs:18302,op:havoc,rep:5
+==1885581==ERROR: AddressSanitizer: heap-use-after-free on address 0xe6000790 at pc 0x5b755be1 bp 0xff99fb68 sp 0xff99fb60
+    #0 0x5b755be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5b756ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5b757328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xe8440f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5b70a8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000008,sig:06,src:000013,time:24909,execs:18403,op:havoc,rep:1
+==1885696==ERROR: AddressSanitizer: heap-use-after-free on address 0xe8b00790 at pc 0x6656dbe1 bp 0xffaea268 sp 0xffaea260
+    #0 0x6656dbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x6656eebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x6656f328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xeaec5f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x665228ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000009,sig:06,src:000013,time:29254,execs:20630,op:havoc,rep:4
+==1885804==ERROR: AddressSanitizer: heap-use-after-free on address 0xf1900790 at pc 0x5b629be1 bp 0xff985da8 sp 0xff985da0
+    #0 0x5b629be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5b62aebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5b62b328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf3ca9f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5b5de8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000010,sig:04,src:000017,time:40477,execs:26200,op:havoc,rep:1
+=== findings/net/asan_ubsan/crashes/id:000011,sig:04,src:000021,time:51669,execs:30559,op:havoc,rep:3
+=== findings/net/asan_ubsan/crashes/id:000012,sig:06,src:000021,time:51875,execs:30627,op:havoc,rep:2
+==1886080==ERROR: AddressSanitizer: heap-use-after-free on address 0xe8c00790 at pc 0x66118be1 bp 0xffc789c8 sp 0xffc789c0
+    #0 0x66118be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x66119ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x6611a328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xeb047f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x660cd8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000013,sig:06,sync:master_nosan,src:000023
+==1886171==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf5500631 at pc 0x64bca902 bp 0xffca42a8 sp 0xffca3e7c
+    #0 0x64bca901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x64c186aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x64c18d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x64c19328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x64bccb71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000014,sig:04,src:000023,time:70630,execs:37973,op:havoc,rep:2
+=== findings/net/asan_ubsan/crashes/id:000015,sig:04,sync:master_nosan,src:000024
+=== findings/net/asan_ubsan/crashes/id:000016,sig:06,src:000019,time:81388,execs:42638,op:havoc,rep:1
+==1886371==ERROR: AddressSanitizer: heap-use-after-free on address 0xeab00790 at pc 0x5ce5ebe1 bp 0xff87e468 sp 0xff87e460
+    #0 0x5ce5ebe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5ce5febb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5ce60328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xecee1f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5ce138ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000017,sig:06,src:000027,time:159542,execs:77729,op:havoc,rep:2
+==1886463==ERROR: AddressSanitizer: heap-use-after-free on address 0xf0a00790 at pc 0x63f25be1 bp 0xffcce1c8 sp 0xffcce1c0
+    #0 0x63f25be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x63f26ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x63f27328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf2e4cf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x63eda8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000018,sig:06,src:000027,time:189094,execs:90278,op:havoc,rep:3
+==1886576==ERROR: AddressSanitizer: heap-use-after-free on address 0xebd00790 at pc 0x56b88be1 bp 0xff882fa8 sp 0xff882fa0
+    #0 0x56b88be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x56b89ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x56b8a328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xee14df5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x56b3d8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000019,sig:06,src:000027,time:192261,execs:91314,op:havoc,rep:3
+==1886652==ERROR: AddressSanitizer: heap-use-after-free on address 0xf0d00790 at pc 0x5e464be1 bp 0xffb9c128 sp 0xffb9c120
+    #0 0x5e464be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5e465ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5e466328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf30d7f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5e4198ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000020,sig:06,src:000027,time:314669,execs:144402,op:havoc,rep:1
+==1886768==ERROR: AddressSanitizer: heap-use-after-free on address 0xec400790 at pc 0x64bf8be1 bp 0xffff7288 sp 0xffff7280
+    #0 0x64bf8be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x64bf9ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x64bfa328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xee7f8f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x64bad8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000021,sig:06,src:000030,time:602211,execs:257694,op:havoc,rep:3
+==1886848==ERROR: AddressSanitizer: heap-use-after-free on address 0xf3f00790 at pc 0x5ac9dbe1 bp 0xff8a0848 sp 0xff8a0840
+    #0 0x5ac9dbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5ac9eebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5ac9f328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf6331f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5ac528ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/asan_ubsan/crashes/id:000022,sig:06,src:000057,time:3509606,execs:1264061,op:havoc,rep:63
+==1886906==ERROR: AddressSanitizer: heap-use-after-free on address 0xec300790 at pc 0x57ababe1 bp 0xfff797c8 sp 0xfff797c0
+    #0 0x57ababe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x57abbebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x57abc328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xee6c1f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x57a6f8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000000,sig:11,src:000000,time:123,execs:107,op:flip1,pos:6
+==1886937==ERROR: AddressSanitizer: negative-size-param: (size=-8)
+    #0 0x6630d7c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x6635b727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x6635bd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x6635c328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x6635b9e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000001,sig:06,src:000000,time:152,execs:131,op:flip2,pos:6
+=== findings/net/master_nosan/crashes/id:000002,sig:11,src:000000,time:381,execs:295,op:arith8,pos:6,val:-12
+==1887066==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x656267c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x65674727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x65674d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x65675328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x656749e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000003,sig:11,sync:msan,src:000012
+=== findings/net/master_nosan/crashes/id:000004,sig:06,src:000010,time:4835,execs:3515,op:havoc,rep:3
+==1887253==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf0e00778 at pc 0x58426902 bp 0xffb620c8 sp 0xffb61c9c
+    #0 0x58426901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x584746aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x58474d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x58475328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x58428b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000005,sig:11,src:000011,time:4932,execs:3591,op:havoc,rep:1
+==1887315==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x6020b7c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x60259727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x60259d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x6025a328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x602599e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000006,sig:06,src:000012,time:7741,execs:5662,op:havoc,rep:10
+=== findings/net/master_nosan/crashes/id:000007,sig:06,src:000015,time:9199,execs:6718,op:havoc,rep:1
+==1887494==ERROR: AddressSanitizer: heap-use-after-free on address 0xf3800790 at pc 0x6637fbe1 bp 0xffdbf9a8 sp 0xffdbf9a0
+    #0 0x6637fbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x66380ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x66381328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf5bacf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x663348ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000008,sig:11,sync:msan,src:000021
+==1887562==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xea600090 at pc 0x5f4fa80e bp 0xff9fd208 sp 0xff9fcdd4
+    #0 0x5f4fa80d  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5f4fb72c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5f5c12b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5f5c1d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5f5c0fa7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109fa7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000009,sig:06,src:000012,time:16442,execs:12177,op:havoc,rep:3
+==1887623==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xed300778 at pc 0x660c7902 bp 0xff99c6a8 sp 0xff99c27c
+    #0 0x660c7901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x661156aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x66115d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x66116328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x660c9b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000010,sig:06,src:000019,time:24260,execs:17197,op:havoc,rep:6
+==1887654==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xec000735 at pc 0x56c32902 bp 0xffa87c28 sp 0xffa877fc
+    #0 0x56c32901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x56c806aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x56c80d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x56c81328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x56c34b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000011,sig:06,src:000021,time:26951,execs:18852,op:havoc,rep:5
+==1887698==ERROR: AddressSanitizer: heap-use-after-free on address 0xf1500790 at pc 0x56965be1 bp 0xff8c7c88 sp 0xff8c7c80
+    #0 0x56965be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x56966ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x56967328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf38e7f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5691a8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000012,sig:06,src:000023,time:30324,execs:21103,op:havoc,rep:4
+==1887761==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe7800651 at pc 0x5c253902 bp 0xff844368 sp 0xff843f3c
+    #0 0x5c253901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5c2a16aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5c2a1d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5c2a2328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5c255b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000013,sig:06,src:000020,time:32000,execs:22280,op:havoc,rep:2
+==1887825==ERROR: AddressSanitizer: heap-use-after-free on address 0xed000790 at pc 0x58120be1 bp 0xff9748e8 sp 0xff9748e0
+    #0 0x58120be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x58121ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x58122328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xef3abf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x580d58ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000014,sig:11,src:000024,time:34745,execs:24224,op:havoc,rep:2
+=== findings/net/master_nosan/crashes/id:000015,sig:11,src:000032,time:583990,execs:413907,op:havoc,rep:57
+==1887916==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf3300190 at pc 0x57e7380e bp 0xff924e48 sp 0xff924a14
+    #0 0x57e7380d  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x57e7472c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x57f3a2b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x57f3ad11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x57f39fa7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109fa7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000016,sig:06,src:000047,time:718375,execs:503944,op:havoc,rep:10
+==1887986==ERROR: AddressSanitizer: heap-use-after-free on address 0xea400790 at pc 0x654dabe1 bp 0xffa10cc8 sp 0xffa10cc0
+    #0 0x654dabe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x654dbebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x654dc328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xec7d9f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x6548f8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/master_nosan/crashes/id:000017,sig:06,src:000058,time:4375745,execs:2753054,op:havoc,rep:2
+==1888065==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf2d00538 at pc 0x5ca9c902 bp 0xfffb5248 sp 0xfffb4e1c
+    #0 0x5ca9c901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5caea6aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5caead11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5caeb328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5ca9eb71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000000,sig:11,src:000002,time:86,execs:116,op:flip2,pos:4
+==1888129==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x5dab57c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5db03727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5db03d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5db04328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5db039e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000001,sig:06,src:000003,time:3078,execs:2883,op:havoc,rep:4
+==1888212==ERROR: AddressSanitizer: heap-use-after-free on address 0xede00790 at pc 0x5b0debe1 bp 0xff96f1e8 sp 0xff96f1e0
+    #0 0x5b0debe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5b0dfebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5b0e0328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf01c7f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5b0938ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000002,sig:11,src:000012,time:5040,execs:4731,op:havoc,rep:2
+=== findings/net/msan/crashes/id:000003,sig:11,src:000012,time:5060,execs:4734,op:havoc,rep:1
+=== findings/net/msan/crashes/id:000004,sig:06,src:000018,time:23840,execs:19938,op:havoc,rep:3
+==1888417==ERROR: AddressSanitizer: heap-use-after-free on address 0xefe00790 at pc 0x64c3cbe1 bp 0xffbc74c8 sp 0xffbc74c0
+    #0 0x64c3cbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x64c3debb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x64c3e328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf21d1f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x64bf18ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000005,sig:11,src:000020,time:33775,execs:26907,op:havoc,rep:5
+==1888485==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xea800090 at pc 0x5c7cf80e bp 0xffb4d248 sp 0xffb4ce14
+    #0 0x5c7cf80d  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5c7d072c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5c8962b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5c896d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5c895fa7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109fa7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000006,sig:11,src:000020,time:41089,execs:28394,op:havoc,rep:6
+=== findings/net/msan/crashes/id:000007,sig:06,src:000040,time:120747,execs:46059,op:havoc,rep:2
+=== findings/net/msan/crashes/id:000008,sig:06,src:000039,time:144161,execs:59011,op:havoc,rep:3
+=== findings/net/msan/crashes/id:000009,sig:06,src:000003,time:197484,execs:87749,op:havoc,rep:4
+==1888859==ERROR: AddressSanitizer: heap-use-after-free on address 0xe7000790 at pc 0x600fbbe1 bp 0xffb899e8 sp 0xffb899e0
+    #0 0x600fbbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x600fcebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x600fd328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xe937ff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x600b08ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000010,sig:11,src:000003,time:601438,execs:288461,op:havoc,rep:30
+==1888987==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xe9d00090 at pc 0x5aa2180e bp 0xffc2b028 sp 0xffc2abf4
+    #0 0x5aa2180d  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5aa2272c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5aae82b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5aae8d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5aae7fa7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109fa7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/msan/crashes/id:000011,sig:11,src:000075,time:709697,execs:350849,op:havoc,rep:2
+==1889067==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf6000090 at pc 0x6311280e bp 0xffe626c8 sp 0xffe62294
+    #0 0x6311280d  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x6311372c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x631d92b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x631d9d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x631d8fa7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109fa7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000000,sig:11,src:000002,time:82,execs:116,op:flip2,pos:4
+==1889194==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x5e2517c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5e29f727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5e29fd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5e2a0328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5e29f9e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000001,sig:06,src:000000,time:2443,execs:2426,op:havoc,rep:2
+=== findings/net/nosan1/crashes/id:000002,sig:06,src:000003,time:2602,execs:2591,op:havoc,rep:3
+=== findings/net/nosan1/crashes/id:000003,sig:06,src:000000,time:2781,execs:2764,op:havoc,rep:4
+=== findings/net/nosan1/crashes/id:000004,sig:06,src:000003,time:6544,execs:6300,op:havoc,rep:2
+==1889640==ERROR: AddressSanitizer: heap-use-after-free on address 0xefc00790 at pc 0x661efbe1 bp 0xff9d6e08 sp 0xff9d6e00
+    #0 0x661efbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x661f0ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x661f1328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf1feef5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x661a48ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000005,sig:11,src:000012,time:10947,execs:10147,op:havoc,rep:1
+==1889755==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x572087c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x57256727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x57256d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x57257328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x572569e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000006,sig:06,src:000013,time:13341,execs:11978,op:havoc,rep:1
+==1889828==ERROR: AddressSanitizer: heap-use-after-free on address 0xeec00790 at pc 0x606abbe1 bp 0xffbe84c8 sp 0xffbe84c0
+    #0 0x606abbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x606acebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x606ad328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf0fbef5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x606608ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000007,sig:06,src:000013,time:14510,execs:12852,op:havoc,rep:1
+==1889899==ERROR: AddressSanitizer: heap-use-after-free on address 0xe7700790 at pc 0x6412ebe1 bp 0xff8e5f88 sp 0xff8e5f80
+    #0 0x6412ebe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x6412febb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x64130328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xe9aa1f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x640e38ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000008,sig:06,src:000013,time:15571,execs:13734,op:havoc,rep:2
+==1889999==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe6f00758 at pc 0x64e24902 bp 0xffa75fc8 sp 0xffa75b9c
+    #0 0x64e24901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x64e726aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x64e72d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x64e73328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x64e26b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000009,sig:06,src:000012,time:27132,execs:22718,op:havoc,rep:1
+=== findings/net/nosan1/crashes/id:000010,sig:06,src:000018,time:44993,execs:35421,op:havoc,rep:1
+==1890151==ERROR: AddressSanitizer: heap-use-after-free on address 0xf3c00790 at pc 0x5b6ddbe1 bp 0xffb7fae8 sp 0xffb7fae0
+    #0 0x5b6ddbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5b6de57b  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a57b) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5b6ded11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5b6df328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5b6928ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000011,sig:06,src:000020,time:48240,execs:37831,op:havoc,rep:5
+==1890229==ERROR: AddressSanitizer: heap-use-after-free on address 0xf1600790 at pc 0x61b4dbe1 bp 0xff9249a8 sp 0xff9249a0
+    #0 0x61b4dbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x61b4eebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x61b4f328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf39d3f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x61b028ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000012,sig:06,src:000024,time:53526,execs:41757,op:quick,pos:52
+=== findings/net/nosan1/crashes/id:000013,sig:11,src:000024,time:57264,execs:44410,op:havoc,rep:2
+=== findings/net/nosan1/crashes/id:000014,sig:06,src:000024,time:87984,execs:66850,op:havoc,rep:6
+==1890451==ERROR: AddressSanitizer: heap-use-after-free on address 0xe6200790 at pc 0x63725be1 bp 0xff8ccf28 sp 0xff8ccf20
+    #0 0x63725be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x6372657b  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a57b) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x63726d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x63727328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x636da8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000015,sig:11,src:000034,time:600490,execs:435893,op:havoc,rep:13
+==1890508==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xeee00410 at pc 0x62036da6 bp 0xfff99eb8 sp 0xfff99a50
+    #0 0x62036da5  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x42da5) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x62037616  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x43616) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x6203872c  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x620fe2b8  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a2b8) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x620fe9e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000016,sig:06,src:000051,time:1186332,execs:826187,op:havoc,rep:3
+==1890571==ERROR: AddressSanitizer: heap-use-after-free on address 0xf0800790 at pc 0x59d9fbe1 bp 0xff9dd2c8 sp 0xff9dd2c0
+    #0 0x59d9fbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x59da057b  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a57b) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x59da0d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x59da1328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x59d548ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan1/crashes/id:000017,sig:06,src:000046,time:3934258,execs:2409224,op:havoc,rep:1
+==1890668==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe8400578 at pc 0x5dd49902 bp 0xffe914a8 sp 0xffe9107c
+    #0 0x5dd49901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5dd976aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5dd97d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5dd98328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5dd4bb71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000000,sig:11,src:000002,time:84,execs:116,op:flip2,pos:4
+==1890737==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x5aefd7c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5af4b727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5af4bd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5af4c328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5af4b9e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000001,sig:11,src:000011,time:5020,execs:4722,op:havoc,rep:8
+=== findings/net/nosan2/crashes/id:000002,sig:11,src:000010,time:7139,execs:6369,op:havoc,rep:1
+==1890897==ERROR: AddressSanitizer: negative-size-param: (size=-8)
+    #0 0x5d9447c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d992727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d992d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5d993328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5d9929e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000003,sig:06,src:000013,time:8469,execs:7383,op:havoc,rep:7
+=== findings/net/nosan2/crashes/id:000004,sig:06,src:000013,time:8616,execs:7497,op:havoc,rep:1
+==1891069==ERROR: AddressSanitizer: heap-use-after-free on address 0xf4c00790 at pc 0x64b4dbe1 bp 0xffa39608 sp 0xffa39600
+    #0 0x64b4dbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x64b4eebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x64b4f328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf6ff2f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x64b028ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000005,sig:06,src:000013,time:8693,execs:7550,op:havoc,rep:2
+==1891133==ERROR: AddressSanitizer: heap-use-after-free on address 0xef300790 at pc 0x62c05be1 bp 0xffc827c8 sp 0xffc827c0
+    #0 0x62c05be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x62c06ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x62c07328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf1687f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x62bba8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000006,sig:11,src:000011,time:19773,execs:16273,op:havoc,rep:1
+==1891245==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x5cfd37c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d021727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d021d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5d022328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5d0219e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000007,sig:06,src:000011,time:19780,execs:16276,op:havoc,rep:2
+==1891297==ERROR: AddressSanitizer: heap-use-after-free on address 0xe9300790 at pc 0x5ef85be1 bp 0xffebb7e8 sp 0xffebb7e0
+    #0 0x5ef85be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5ef86ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5ef87328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xeb701f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5ef3a8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000008,sig:11,src:000017,time:31765,execs:25272,op:havoc,rep:5
+==1891410==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x656987c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x656e6727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x656e6d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x656e7328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x656e69e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000009,sig:06,src:000019,time:36925,execs:28633,op:havoc,rep:2
+==1891481==ERROR: AddressSanitizer: heap-use-after-free on address 0xe7200790 at pc 0x56c6bbe1 bp 0xffe54c68 sp 0xffe54c60
+    #0 0x56c6bbe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x56c6cebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x56c6d328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xe9608f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x56c208ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000010,sig:11,src:000022,time:44645,execs:33805,op:havoc,rep:1
+==1891589==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x635267c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x63574727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x63574d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x63575328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x635749e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000011,sig:06,src:000023,time:47450,execs:35873,op:havoc,rep:2
+==1891690==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe9f00651 at pc 0x58522902 bp 0xffdf92c8 sp 0xffdf8e9c
+    #0 0x58522901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x585706aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x58570d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x58571328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x58524b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000012,sig:06,src:000024,time:84796,execs:62762,op:havoc,rep:7
+==1891745==ERROR: AddressSanitizer: heap-use-after-free on address 0xeeb00790 at pc 0x62c44be1 bp 0xffea8a88 sp 0xffea8a80
+    #0 0x62c44be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x62c45ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x62c46328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf0ea6f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x62bf98ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000013,sig:06,src:000032,time:593079,execs:427548,op:havoc,rep:5
+=== findings/net/nosan2/crashes/id:000014,sig:06,src:000046,time:816892,execs:577675,op:havoc,rep:3
+==1891879==ERROR: AddressSanitizer: heap-use-after-free on address 0xefb00790 at pc 0x5d493be1 bp 0xffa9e848 sp 0xffa9e840
+    #0 0x5d493be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d494ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d495328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf1f36f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5d4488ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000015,sig:06,src:000064,time:3674944,execs:2270527,op:havoc,rep:62
+==1891927==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe72005f3 at pc 0x63bff902 bp 0xffad02c8 sp 0xffacfe9c
+    #0 0x63bff901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x63c4d6aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x63c4dd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x63c4e328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x63c01b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan2/crashes/id:000016,sig:06,src:000064,time:5796247,execs:3186839,op:havoc,rep:31
+==1891984==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xec500538 at pc 0x5dbcb902 bp 0xffc0d4c8 sp 0xffc0d09c
+    #0 0x5dbcb901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5dc196aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5dc19d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5dc1a328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5dbcdb71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000000,sig:11,src:000002,time:100,execs:116,op:flip2,pos:4
+==1892056==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x654b67c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x65504727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x65504d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x65505328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x655049e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000001,sig:06,src:000012,time:3181,execs:2586,op:havoc,rep:1
+==1892104==ERROR: AddressSanitizer: heap-use-after-free on address 0xe7300790 at pc 0x5d94ebe1 bp 0xff987ca8 sp 0xff987ca0
+    #0 0x5d94ebe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d94febb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d950328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xe96daf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5d9038ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000002,sig:11,src:000000,time:3856,execs:3074,op:havoc,rep:2
+==1892139==ERROR: AddressSanitizer: negative-size-param: (size=-8)
+    #0 0x5c0f27c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5c140727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5c140d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5c141328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5c1409e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000003,sig:06,src:000012,time:5988,execs:4767,op:havoc,rep:1
+==1892185==ERROR: AddressSanitizer: heap-use-after-free on address 0xe7b00790 at pc 0x5d720be1 bp 0xffa49a88 sp 0xffa49a80
+    #0 0x5d720be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d721ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d722328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xe9e93f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5d6d58ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000004,sig:11,src:000011,time:7407,execs:5991,op:havoc,rep:2
+==1892216==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x56b5f7c4  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x56bad727  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a727) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x56badd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x56bae328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x56bad9e7  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a9e7) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000005,sig:06,src:000014,time:7643,execs:6189,op:havoc,rep:4
+=== findings/net/nosan3/crashes/id:000006,sig:06,src:000009,time:8927,execs:7270,op:havoc,rep:5
+==1892357==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xeef0075b at pc 0x56692902 bp 0xffc004a8 sp 0xffc0007c
+    #0 0x56692901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x566e06aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x566e0d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x566e1328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x56694b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000007,sig:06,src:000015,time:11635,execs:9313,op:havoc,rep:1
+==1892447==ERROR: AddressSanitizer: heap-use-after-free on address 0xefd00790 at pc 0x5c2eebe1 bp 0xffb639a8 sp 0xffb639a0
+    #0 0x5c2eebe0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5c2efebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5c2f0328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf20caf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5c2a38ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000008,sig:06,src:000020,time:35172,execs:26462,op:havoc,rep:7
+==1892558==ERROR: AddressSanitizer: heap-use-after-free on address 0xf2500790 at pc 0x59bc6be1 bp 0xffdca7a8 sp 0xffdca7a0
+    #0 0x59bc6be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x59bc7ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x59bc8328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xf4928f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x59b7b8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000009,sig:06,src:000023,time:39764,execs:29683,op:havoc,rep:1
+==1892660==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xea600651 at pc 0x5940f902 bp 0xffe68d88 sp 0xffe6895c
+    #0 0x5940f901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5945d6aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5945dd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5945e328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x59411b71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000010,sig:06,src:000024,time:46476,execs:34703,op:havoc,rep:1
+=== findings/net/nosan3/crashes/id:000011,sig:11,src:000024,time:47400,execs:35308,op:havoc,rep:7
+==1892794==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xeef006b8 at pc 0x5d7ad902 bp 0xff923a48 sp 0xff92361c
+    #0 0x5d7ad901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d7fb6aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d7fbd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5d7fc328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5d7afb71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000012,sig:11,src:000038,time:602131,execs:434883,op:havoc,rep:12
+==1892891==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe7600751 at pc 0x58c1d902 bp 0xfff33668 sp 0xfff3323c
+    #0 0x58c1d901  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x58c6b6aa  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a6aa) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x58c6bd11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x58c6c328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x58c1fb71  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbeb71) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000013,sig:06,src:000046,time:772105,execs:547443,op:havoc,rep:9
+==1892990==ERROR: AddressSanitizer: heap-use-after-free on address 0xecc00790 at pc 0x5d2b2be1 bp 0xffae8e48 sp 0xffae8e40
+    #0 0x5d2b2be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5d2b3ebb  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10aebb) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5d2b4328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0xeef6df5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b494e9dd41622d50cb2f6ed261130af141ecbada)
+    #0 0x5d2678ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+=== findings/net/nosan3/crashes/id:000014,sig:06,src:000061,time:3968432,execs:2265832,op:havoc,rep:1
+==1893099==ERROR: AddressSanitizer: heap-use-after-free on address 0xebd00790 at pc 0x5b808be1 bp 0xffd974c8 sp 0xffd974c0
+    #0 0x5b808be0  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x109be0) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5b80957b  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10a57b) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x5b809d11  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10ad11) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x5b80a328  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0x10b328) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #0 0x5b7bd8ee  (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network_asan_ubsan+0xbe8ee) (BuildId: 006626492187b053caab2cf57757f866090167d7)

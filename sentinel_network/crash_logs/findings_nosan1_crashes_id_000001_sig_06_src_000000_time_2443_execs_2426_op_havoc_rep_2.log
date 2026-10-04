@@ -1,0 +1,5 @@
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (56 bytes received)...
+[NETWORK LOG] Command Type: 1, Length: 16, Magic: 0x12345678, Data: AAAAA=AAAAAA
+Station status telecommand processed successfully.
+findings/nosan1/crashes/id:000001,sig:06,src:000000,time:2443,execs:2426,op:havoc,rep:2
