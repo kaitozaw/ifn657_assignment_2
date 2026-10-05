@@ -641,16 +641,183 @@ Program received signal SIGILL, Illegal instruction.
 **Technical Justification:**
 `[Explain how the patch fixes the root cause]`
 
-### 5.2 Regression Verification & Fuzzing Proof
-*[Demonstrate that your patched target binaries run cleanly on previously crashing inputs and continue to accept valid seed inputs without errors.]*
+#### Patch for Vulnerability 11 (`sentinel_network.c`):
+```c
+snprintf(header_summary, sizeof(header_summary), "Command Type: %d, Length: %d, Magic: 0x%x, Data: %.*s",
+        pkt->type, pkt->length, pkt->magic, pkt->length, (char *)pkt->data);
+```
+**Technical Justification:**
+`snprintf` bounds the write to `sizeof(header_summary)` and `%.*s` limits the read to `pkt->length`, preventing both the stack overflow and the over-read.
 
+#### Patch for Vulnerability 12 (`sentinel_network.c`):
+```c
+payload_size = pkt->length;
+```
+**Technical Justification:**
+Using `pkt->length` directly (it already excludes the header) removes the subtraction that underflowed to a huge unsigned size.
+
+#### Patch for Vulnerability 13 (`sentinel_network.c`):
+```c
+payload_size = pkt->length;
+```
+**Technical Justification:**
+Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 4-byte heap overflow.
+
+#### Patch for Vulnerability 14 (`sentinel_network.c`):
+```c
+void emergency_command_cleanup(void) {
+    for (int i = 0; i < active_telecommand_count; i++) {
+        if (active_telecommands[i]) {
+            release_telecommand_record(active_telecommands[i]);
+            active_telecommands[i] = NULL;
+        }
+    }
+    active_telecommand_count = 0;
+}
+```
+**Technical Justification:**
+Nulling each freed pointer and resetting the count makes repeated cleanup calls no-ops, preventing the use-after-free and double free.
+
+#### Patch for Vulnerability 15 (`sentinel_network.c`):
+```c
+typedef struct __attribute__((packed)) {
+    uint32_t magic;
+    uint16_t type;
+    uint16_t length;
+    uint8_t data[];
+} telecommand_packet_t;
+```
+**Technical Justification:**
+`__attribute__((packed))` makes the compiler emit alignment-safe loads, so header fields can be read at any stream offset.
+
+### 5.2 Regression Verification & Fuzzing Proof
+
+sentinel_telemetry
+```bash
+# Demonstrate executing the patched binaries against all triggering crash inputs
+
+```
+sentinel_payload
 ```bash
 # Demonstrate executing the patched binaries against all triggering crash inputs
 
 ```
 
+sentinel_network
+```bash
+AFL_USE_ASAN=1 AFL_USE_UBSAN=1 afl-clang-fast -m32 -std=c99 -w -g -o sentinel_network_remediated sentinel_network_remediated.c
+
+# ./sentinel_network_remediated crash_analysis/stack-buffer-overflow01.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (85 bytes received)...
+[NETWORK LOG] Command Type: 1, Length: 48, Magic: 0x12345678, Data: AAAA+SAAAZAAAAAAAAzAAAAAAAAAAAAAzAAAAAAAAAAAAA>A
+Station status telecommand processed successfully.
+
+# ./sentinel_network_remediated crash_analysis/stack-buffer-overflow02.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (1024 bytes received)...
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: ]AA
+Thruster calibration telecommand processed successfully.
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+[NETWORK LOG] Command Type: 3, Length: 4, Magic: 0x12345678, Data: AAAx
+Emergency station failover executed.
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (1024 bytes received)...
+Ingesting packet frame (956 bytes received)...
+
+# ./sentinel_network_remediated crash_analysis/negative-size-param01.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (12 bytes received)...
+[NETWORK LOG] Command Type: 1, Length: 4, Magic: 0x12345678, Data: AAA
+Station status telecommand processed successfully.
+
+# ./sentinel_network_remediated crash_analysis/heap-buffer-overflow01.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (44 bytes received)...
+[NETWORK LOG] Command Type: 1, Length: 16, Magic: 0x12345678, Data: AAAAAGAAAA@�
+Station status telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 12, Magic: 0x12345678, Data: 
+Thruster calibration telecommand processed successfully.
+
+# ./sentinel_network_remediated crash_analysis/heap-use-after-free01.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (36 bytes received)...
+[NETWORK LOG] Command Type: 1, Length: 16, Magic: 0x12345678, Data: AAAAAAAAAAAAAAA
+Station status telecommand processed successfully.
+[NETWORK LOG] Command Type: 3, Length: 4, Magic: 0x12345678, Data: AAA
+Emergency station failover executed.
+
+# ./sentinel_network_remediated crash_analysis/heap-use-after-free02.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (56 bytes received)...
+[NETWORK LOG] Command Type: 3, Length: 4, Magic: 0x12345678, Data: AA
+Emergency station failover executed.
+[NETWORK LOG] Command Type: 2, Length: 4, Magic: 0x12345678, Data: AA
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 3, Length: 4, Magic: 0x12345678, Data: AA
+Emergency station failover executed.
+[NETWORK LOG] Command Type: 3, Length: 4, Magic: 0x12345678, Data: AAAx
+Emergency station failover executed.
+
+# ./sentinel_network_remediated crash_analysis/illegal-instruction01.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (48 bytes received)...
+[NETWORK LOG] Command Type: 1, Length: 15, Magic: 0x12345678, Data: 4
+Station status telecommand processed successfully.
+
+```
+
 **Regression Fuzzing Observations:**
-`[Document your regression campaign results proving zero new crashes occurred during re-fuzzing]`
+
+sentinel_telemetry
+```bash
+
+```
+```
+[Insert Screenshot: sentinel_telemetry AFL++ Status Screen]
+```
+
+sentinel_payload
+```bash
+
+```
+```
+[Insert Screenshot: sentinel_telemetry AFL++ Status Screen]
+```
+
+sentinel_network
+```bash
+afl-fuzz -i seeds -o findings/remediated -x dict ./sentinel_network_remediated @@
+```
+
+![sentinel_network AFL++ Status Screen](images/sentinel_network/sentinel_network_remediated_afl_status_screen.png)
 
 ---
 

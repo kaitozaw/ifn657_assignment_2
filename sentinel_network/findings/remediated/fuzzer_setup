@@ -1,0 +1,6 @@
+# environment variables:
+AFL_CUSTOM_INFO_PROGRAM=./sentinel_network_remediated
+AFL_CUSTOM_INFO_PROGRAM_ARGV=@@
+AFL_CUSTOM_INFO_OUT=findings/remediated/default
+# command line:
+'afl-fuzz' '-i' 'seeds' '-o' 'findings/remediated' '-x' 'dict' './sentinel_network_remediated' '@@'
