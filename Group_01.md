@@ -452,7 +452,7 @@ READ of size 1017 at 0xe8b00410 thread T0
 ```
 
 **Exploitability Assessment:**
-The severity of these stack buffer overflow vulnerabilities is moderate, as the binary is compiled with stack protection mechanisms. When the 128-byte buffer is overflowed, the stack canary is corrupted, and this is detected when the function returns, causing the program to abort before the overwritten return address can be used. However, this still results in a crash, so a denial-of-service impact remains. Even if the canary were bypassed, ASLR makes it difficult for an attacker to predict valid target addresses. In addition, the stack is non-executable, so shellcode injected via the packet cannot be executed directly.
+The write overflow is of moderate severity due to stack protections. Overflowing the 128-byte buffer corrupts the stack canary, which is detected on function return and aborts the program, leaving only a denial-of-service impact. Even if the canary were bypassed, ASLR hinders address prediction and the non-executable stack prevents injected shellcode from running. The read overflow, however, is not mitigated by these protections, as no memory is modified. If the out-of-bounds data is returned to the attacker, it may leak the canary or stack addresses, enabling bypass of the canary and ASLR.
 
 ---
 
