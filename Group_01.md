@@ -233,8 +233,10 @@ sentinel_payload
 ```
 
 sentinel_network
-![sentinel_network AFL++ Status Screen](images/sentinel_network_afl_status_screen.png)
-![sentinel_network AFL++ Summary Stats](images/sentinel_network_afl_summary_stats.png)
+
+![sentinel_network AFL++ Status Screen](images/sentinel_network/sentinel_network_afl_status_screen.png)
+
+![sentinel_network AFL++ Summary Stats](images/sentinel_network/sentinel_network_afl_summary_stats.png)
 
 ---
 
@@ -296,36 +298,16 @@ awk -F'\t' '
   done
 ```
 
-4. decode the input as a packet sequence (`network` only)
+4. inspect the sanitizer report for each representative file and match it against the source code
+
+```bash
+./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin
+```
+
+5. decode the input as a packet sequence (`network` only)
 
 ```bash
 xxd crash_analysis/{name}.bin
-```
-
-5. match the sanitizer report against the source code (filter depends on the vulnerability type)
-
-```bash
-# stack buffer overflow
-./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin 2>&1 | grep -E "ERROR|WRITE|READ|located in stack|frame has|<== Memory access|#[0-3] "
-
-# heap buffer overflow
-./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin 2>&1 | grep -E "ERROR|WRITE|READ|located|allocated by|#[0-3] "
-
-# format string vulnerability
-./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin 2>&1 | grep -E "ERROR|WRITE|READ|printf|#[0-5] "
-grep -aoE '%[0-9.$-]*[a-zA-Z]+' crash_analysis/{name}.bin | sort | uniq -c
-
-# integer overflow/underflow
-./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin 2>&1 | grep -E "runtime error|negative-size-param|ERROR|located|allocated by|#[0-3] "
-
-# use-after-free
-./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin 2>&1 | grep -E "ERROR|WRITE|READ|located|freed by|allocated by|#[0-3] "
-
-# double-free
-./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin 2>&1 | grep -E "ERROR|double-free|freed by|allocated by|#[0-3] "
-
-# uninitialised memory access
-./sentinel_network_msan crash_analysis/{name}.bin 2>&1 | grep -E "MemorySanitizer|Uninitialized value|#[0-3] "
 ```
 
 ### 4.2 Discovered Vulnerabilities
@@ -422,31 +404,51 @@ grep -aoE '%[0-9.$-]*[a-zA-Z]+' crash_analysis/{name}.bin | sort | uniq -c
 | **Vulnerability Name** | `Stack Buffer Overflow in Telecommand Header Logging` |
 | **CWE Classification** | `CWE-121: Stack-based Buffer Overflow` (+ `CWE-125: Out-of-bounds Read`) |
 | **Target Component** | `sentinel_network.c` |
-| **Vulnerable Location** | `log_telecommand_header()` L43: `sprintf(header_summary, "... Data: %s", ..., (char *)pkt->data)` |
-| **Reproducing Input File** | `crash_analysis/stack-buffer-overflow1.bin` (write), `crash_analysis/stack-buffer-overflow2.bin` (read) |
+| **Vulnerable Location** | `log_telecommand_header()` L43 (root cause) → `sprintf()` (crash site): `sprintf(header_summary, "... Data: %s", ..., (char *)pkt->data);` |
+| **Reproducing Input File** | `crash_analysis/stack-buffer-overflow01.bin`, `crash_analysis/stack-buffer-overflow02.bin` |
 
 **Triggering Input & Reproduction Command:**
 ```bash
-./sentinel_network_asan_ubsan crash_analysis/stack-buffer-overflow1.bin   # overflow write into header_summary
-./sentinel_network_asan_ubsan crash_analysis/stack-buffer-overflow2.bin   # over-read past input_stream
+xxd crash_analysis/stack-buffer-overflow01.bin
+# 00000000: 7856 3412 0100 3000 4141 4141 2b53 4141  xV4...0.AAAA+SAA   <- packet 1: type=1, length=48 (no `00` in data, so %s reads beyond length)
+# 00000010: 415a 4141 4141 4141 4141 7a41 4141 4141  AZAAAAAAAAzAAAAA
+# 00000020: 4141 4141 4141 4141 7a41 4141 4141 4141  AAAAAAAAzAAAAAAA
+# 00000030: 4141 4141 4141 3e41 4141 4141 4a41 4141  AAAAAA>AAAAAJAAA
+# 00000040: 5541 4141 413e 4141 4141 414a 4141 4141  UAAAA>AAAAAJAAAA
+# ...
+
+xxd crash_analysis/stack-buffer-overflow02.bin
+# 00000000: 7856 3412 0200 0400 5d41 4100 7800 3412  xV4.....]AA.x.4.   <- packet 1: type=2, length=4
+# ...                                                                   
+# 00003c00: 7856 3412 0300 0400 4141 4178 5634 1241  xV4.....AAAxV4.A   <- packet 2: type=3, length=4 (no `00` in data, so %s reads beyond length)
+# 00003c10: 4141 4141 4141 4141 4141 4141 4141 4141  AAAAAAAAAAAAAAAA
+# ...
+
+./sentinel_network_asan_ubsan crash_analysis/stack-buffer-overflow01.bin   # overflow write into header_summary
+./sentinel_network_asan_ubsan crash_analysis/stack-buffer-overflow02.bin   # overflow read past input_stream
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+The `log_telecommand_header()` function stores the local variable `char header_summary`, a 128-byte buffer, in its stack frame, and the `sprintf` function writes a formatted string into this variable. Because `sprintf` cannot limit the number of bytes it writes, large inputs could cause a stack buffer overflow. In the first crash file, the packet size is 48 bytes, which fits within the buffer. However, the data did not end with `00`, so the function could not recognise the end of the string. It kept reading past the end of the data until the overflow error was flagged. In the second crash file, the packet length is 4 bytes, but the absence of `00` resulted in reading beyond `uint8_t input_stream`, a 1024-byte buffer in `main()`.
 
 **GDB / Sanitiser Evidence:**
 ```text
 # stack-buffer-overflow1.bin
-ERROR: AddressSanitizer: stack-buffer-overflow
-WRITE of size 131 ...                                          <- formatted string exceeds 128 bytes
-  [WRITE] sprintf <- log_telecommand_header sentinel_network.c:43
-  [16, 144) 'header_summary' (line 36) <== Memory access at offset 144 overflows this variable
+==2259390==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf2e00090 at pc 0x6333980e bp 0xff9413e8 sp 0xff940fb4
+WRITE of size 131 at 0xf2e00090 thread T0
+    #0 0x6333980d in vsprintf (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x4380d) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x6333a72c in sprintf (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x634002b8 in log_telecommand_header /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:43:5
+    #3 0x634002b8 in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:120:5
 
 # stack-buffer-overflow2.bin
-ERROR: AddressSanitizer: stack-buffer-overflow
-READ of size 1017 ...                                          <- %s reads pkt->data with no NUL terminator
-  [READ]  sprintf <- log_telecommand_header sentinel_network.c:43
-  [16, 1040) 'input_stream' (line 156) <== Memory access at offset 1040 overflows this variable
+==2259408==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xe8b00410 at pc 0x56c50da6 bp 0xffff0058 sp 0xfffefbf0
+READ of size 1017 at 0xe8b00410 thread T0
+    #0 0x56c50da5 in printf_common(void*, char const*, char*) asan_interceptors.cpp.o
+    #1 0x56c51616 in vsprintf (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x43616) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #2 0x56c5272c in sprintf (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0x4472c) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #3 0x56d182b8 in log_telecommand_header /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:43:5
+    #4 0x56d182b8 in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:120:5
 ```
 
 **Exploitability Assessment:**
@@ -460,25 +462,27 @@ READ of size 1017 ...                                          <- %s reads pkt->
 | **Vulnerability Name** | `Integer Underflow in Payload Size Calculation Leading to Heap Buffer Overflow` |
 | **CWE Classification** | `CWE-191: Integer Underflow` → `CWE-122: Heap-based Buffer Overflow` |
 | **Target Component** | `sentinel_network.c` |
-| **Vulnerable Location** | `calculate_telecommand_payload_size()` L89 (root cause) → `append_telecommand_payload()` L68 (crash site): `(size_t)(total_packet_length - header_overhead)` |
-| **Reproducing Input File** | `crash_analysis/negative-size-param.bin` |
+| **Vulnerable Location** | `calculate_telecommand_payload_size()` L89 (root cause) → `append_telecommand_payload()` L68 (crash site): `memcpy(msg->buffer, payload_data, copy_length);` |
+| **Reproducing Input File** | `crash_analysis/negative-size-param01.bin` |
 
 **Triggering Input & Reproduction Command:**
 ```bash
-xxd crash_analysis/negative-size-param.bin
+xxd crash_analysis/negative-size-param01.bin
 # 00000000: 7856 3412 0100 0400 4141 4100            xV4.....AAA.   <- packet 1: type=1, length=4
 
-./sentinel_network_asan_ubsan crash_analysis/negative-size-param.bin
+./sentinel_network_asan_ubsan crash_analysis/negative-size-param01.bin
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+The `calculate_telecommand_payload_size()` function contains a logic flaw. The program defines the total packet length as the header size (4-byte magic number + 2-byte type + 2-byte length = 8 bytes) plus the size of the packet data. However, this function calculates the payload size by subtracting the header size from the length field (`total_packet_length - header_overhead`). Because of this flaw, the payload is not read correctly. It also becomes a vulnerability when a packet's data size is smaller than its header size: the subtraction gives a negative value, which is then cast to a very large unsigned integer (e.g., 4 − 8 = −4 → 4294967292 in 32-bit environment). When the packet type is 1, the program allocates a 1024-byte message buffer on the heap. `memcpy` in `append_telecommand_payload()` then copies this oversized length into that buffer, which causes a heap overflow.
 
 **GDB / Sanitiser Evidence:**
 ```text
-ERROR: AddressSanitizer: negative-size-param: (size=-4)        <- 4 - 8 underflowed; ASan aborts before memcpy copies
-  [COPY]  append_telecommand_payload sentinel_network.c:68   <- dispatch:128      (packet 1, type=1, length=4)
-Address ... is located in stack ... in frame old_main          <- source pkt->data points into input_stream (stack)
+# negative-size-param01.bin
+==2259471==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x5af9c7c4 in __asan_memcpy (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbc7c4) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5afea727 in append_telecommand_payload /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:68:5
+    #2 0x5afea727 in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:128:17
 ```
 
 **Exploitability Assessment:**
@@ -489,31 +493,33 @@ Address ... is located in stack ... in frame old_main          <- source pkt->da
 #### 4.2.13 Vulnerability 13
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `Heap Buffer Overflow in Thruster Calibration Payload Copy` |
+| **Vulnerability Name** | `Logical Flaw in Payload Size Calculation Leading to Heap Buffer Overflow` |
 | **CWE Classification** | `CWE-122: Heap-based Buffer Overflow` |
 | **Target Component** | `sentinel_network.c` |
-| **Vulnerable Location** | `dispatch_telecommand()` L134-136 (root cause) → `append_telecommand_payload()` L68 (crash site): `memcpy(msg->buffer, payload_data, copy_length);` |
-| **Reproducing Input File** | `crash_analysis/heap-buffer-overflow.bin` |
+| **Vulnerable Location** | `calculate_telecommand_payload_size()` L89 (root cause) → `append_telecommand_payload()` L68 (crash site): `memcpy(msg->buffer, payload_data, copy_length);` |
+| **Reproducing Input File** | `crash_analysis/heap-buffer-overflow01.bin` |
 
 **Triggering Input & Reproduction Command:**
 ```bash
-xxd crash_analysis/heap-buffer-overflow.bin
+xxd crash_analysis/heap-buffer-overflow01.bin
 # 00000000: 7856 3412 0100 1000 4141 4141 4147 4141  xV4.....AAAAAGAA   <- packet 1: type=1, length=16
 # 00000010: 4141 40f4 0100 2000 7856 3412 0200 0c00  AA@... .xV4.....   <- packet 2: type=2, length=12
 # 00000020: 0000 1000 0041 4141 4141 3c00            .....AAAAA<.
 
-./sentinel_network_asan_ubsan crash_analysis/heap-buffer-overflow.bin
+./sentinel_network_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+The logical flaw in the payload size calculation described in Vulnerability 12 also causes a problem when the packet type is 2. When a packet's data size is larger than its header size, the `create_telecommand_record()` function allocates a message buffer that is 4 bytes smaller than required. As a result, a heap overflow occurs when `memcpy` in `append_telecommand_payload()` copies the packet data into the buffer. Here, a negative payload size cast to a very large unsigned integer does not cause the same overflow, as the program allocates the message buffer based on the calculated payload size.
 
 **GDB / Sanitiser Evidence:**
 ```text
-ERROR: AddressSanitizer: heap-buffer-overflow
-WRITE of size 12 ... 0 bytes after 4-byte region                <- copies length (12) into length - 8 (4) bytes
-  [WRITE] append_telecommand_payload sentinel_network.c:68   <- dispatch:136      (packet 2, type=2)
-  [ALLOC] create_telecommand_record  sentinel_network.c:53   <- dispatch:134      (packet 2, type=2)
+# heap-buffer-overflow01.bin
+==2259513==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xe5e00754 at pc 0x5e86c902 bp 0xff8dfe48 sp 0xff8dfa1c
+WRITE of size 12 at 0xe5e00754 thread T0
+    #0 0x5e86c901 in __asan_memcpy (/home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network/sentinel_network_asan_ubsan+0xbc901) (BuildId: 006626492187b053caab2cf57757f866090167d7)
+    #1 0x5e8ba6aa in append_telecommand_payload /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:68:5
+    #2 0x5e8ba6aa in dispatch_telecommand /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:136:17
 ```
 
 **Exploitability Assessment:**
@@ -525,31 +531,44 @@ WRITE of size 12 ... 0 bytes after 4-byte region                <- copies length
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Heap Use After Free in Active Telecommands` |
-| **CWE Classification** | `CWE-416: Use After Free` |
+| **CWE Classification** | `CWE-416: Use After Free` + `CWE-415: Double Free` |
 | **Target Component** | `sentinel_network.c]` |
 | **Vulnerable Location** | `emergency_command_cleanup()` L81-84 (root cause) → `release_telecommand_record()` L73 (crash site): `if (msg->buffer) {` |
-| **Reproducing Input File** | `crash_analysis/heap-use-after-free.bin` |
+| **Reproducing Input File** | `crash_analysis/heap-use-after-free01.bin`, `crash_analysis/heap-use-after-free02.bin` |
 
 **Triggering Input & Reproduction Command:**
 ```bash
-xxd crash_analysis/heap-use-after-free.bin
+xxd crash_analysis/heap-use-after-free01.bin
 # 00000000: 7856 3412 0100 1000 4141 4141 4141 4141  xV4.....AAAAAAAA   <- packet 1: type=1, length=16
 # 00000010: 4141 4141 4141 4100 7856 3412 0300 0400  AAAAAAA.xV4.....   <- packet 2: type=3, length=4
 # 00000020: 4141 4100                                AAA.
 
-./sentinel_network_asan_ubsan crash_analysis/heap-use-after-free.bin
+xxd crash_analysis/heap-use-after-free02.bin
+# 00000000: 7856 3412 0300 0400 4141 0100 7856 3412  xV4.....AA..xV4.   <- packet 1: type=3, length=4 / packet 2: type=2, length=4
+# 00000010: 0200 0400 4141 0100 7856 3412 0300 0400  ....AA..xV4.....   <- packet 3: type=3, length=4
+# 00000020: 4141 0100 7856 3412 0300 0400 4141 4178  AA..xV4.....AAAx   <- packet 4: type=3, length=4
+# ...
+
+./sentinel_network_asan_ubsan crash_analysis/heap-use-after-free01.bin   # type=3 frees record, final cleanup at exit reuses it
+./sentinel_network_asan_ubsan crash_analysis/heap-use-after-free02.bin   # type=3 frees record, next type=3 packet reuses it
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+At the end of the `main()` function, `emergency_command_cleanup()` is called to free the remaining telecommand messages allocated on the heap, whose pointers are stored in the `telecommand_msg_t *active_telecommands[10]` array. However, when the packet type is 3, `dispatch_telecommand()` also calls the same cleanup function. As a result, any subsequent call to the cleanup function accesses and frees heap memory that has already been freed, causing a use-after-free and a double free. In the first crash file, `main()` calls the cleanup function a second time after a type-3 packet has been dispatched. In the second crash file, `dispatch_telecommand()` itself calls it a second time when it dispatches another type-3 packet.
 
 **GDB / Sanitiser Evidence:**
 ```text
-ERROR: AddressSanitizer: heap-use-after-free
-READ of size 4 ... 0 bytes inside of 12-byte region            <- msg->buffer of freed msg
-  [USE]   release_telecommand_record sentinel_network.c:73   <- old_main:189      (2nd cleanup)
-  [FREE]  release_telecommand_record sentinel_network.c:77   <- dispatch:142      (packet 2, type=3)
-  [ALLOC] create_telecommand_record  sentinel_network.c:49   <- dispatch:126      (packet 1, type=1)
+# heap-use-after-free01.bin
+==2259585==ERROR: AddressSanitizer: heap-use-after-free on address 0xe6d00790 at pc 0x582f1be1 bp 0xffa358e8 sp 0xffa358e0
+READ of size 4 at 0xe6d00790 thread T0
+    #0 0x582f1be0 in release_telecommand_record /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:73:14
+    #1 0x582f1be0 in emergency_command_cleanup /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:83:13
+
+# heap-use-after-free02.bin
+==2259598==ERROR: AddressSanitizer: heap-use-after-free on address 0xe5c00790 at pc 0x628abbe1 bp 0xffc6d028 sp 0xffc6d020
+READ of size 4 at 0xe5c00790 thread T0
+    #0 0x628abbe0 in release_telecommand_record /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:73:14
+    #1 0x628abbe0 in emergency_command_cleanup /home/kaitoozawa.guest/ifn657/assignments/assignment_2/sentinel_network.c:83:13
 ```
 
 **Exploitability Assessment:**
@@ -561,31 +580,34 @@ READ of size 4 ... 0 bytes inside of 12-byte region            <- msg->buffer of
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Misaligned Packet Header Access on Unaligned Stream Offset` |
-| **CWE Classification** | `CWE-1319: Improper Protection against Unaligned Access` (reported by UBSan) |
+| **CWE Classification** | `CWE-1319: Improper Protection against Unaligned Access` |
 | **Target Component** | `sentinel_network.c` |
-| **Vulnerable Location** | `validate_packet_integrity()` L94: `if (pkt->magic != PROTOCOL_MAGIC_HEADER)` (pkt cast from an unaligned `input_stream + offset`) |
-| **Reproducing Input File** | `crash_analysis/misaligned-access.bin` |
+| **Vulnerable Location** | `validate_packet_integrity()` L94 (crash site): `if (pkt->magic != PROTOCOL_MAGIC_HEADER) {` |
+| **Reproducing Input File** | `crash_analysis/illegal-instruction01.bin` |
 
 **Triggering Input & Reproduction Command:**
+This crash is a UBSan trap compiled as an illegal instruction, so it raises `SIGILL` with no textual sanitiser report. 
+A representative `sig:04` crash was therefore taken as-is and inspected under GDB to recover the fault location:
 ```bash
-xxd crash_analysis/misaligned-access.bin
+xxd crash_analysis/illegal-instruction01.bin
 # 00000000: 7856 3412 0100 0f00 3412 0200 4141 4a41  xV4.....4...AAJA   <- packet 1: type=1, length=15 (odd)
-# 00000010: 4141 4141 4141 4141 4141 4100 ...         next packet starts at offset 8+15=23 (unaligned)
+# 00000010: 4141 4141 4141 4141 4141 4100 7856 3412  AAAAAAAAAAA.xV4.
+# ...
 
-./sentinel_network_asan_ubsan crash_analysis/misaligned-access.bin
+gdb -batch -ex run -ex bt --args ./sentinel_network_asan_ubsan crash_analysis/illegal-instruction01.bin
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+
+A packet with an odd `length` (15) pushes the next packet header to an unaligned stream offset (23), so reading `pkt->magic` as a 4-byte `uint32_t` at L94 is a misaligned access that UBSan traps as an illegal instruction.
 
 **GDB / Sanitiser Evidence:**
 ```text
+# illegal-instruction01.bin
 Program received signal SIGILL, Illegal instruction.
-validate_packet_integrity sentinel_network.c:94        <- reads pkt->magic (uint32_t) from input_stream+23
-  #1 old_main sentinel_network.c:176                   <- main loop validates the next packet
-  #2 main     sentinel_network.c:198
-# packet 1 has length=15, so the next packet starts at offset 8+15=23, which is not 4-byte aligned;
-# reading uint32_t magic there is undefined behaviour and UBSan traps (SIGILL) before the compare.
+0x5666009d in validate_packet_integrity (pkt=<optimized out>, stream_len=<optimized out>) at sentinel_network.c:94
+94          if (pkt->magic != PROTOCOL_MAGIC_HEADER) {
+#0  0x5666009d in validate_packet_integrity (pkt=<optimized out>, stream_len=<optimized out>) at sentinel_network.c:94
 ```
 
 **Exploitability Assessment:**
