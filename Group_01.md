@@ -46,12 +46,16 @@
 
 sentinel_telemetry
 ```bash
+# Environment configuration
 echo core | sudo tee /proc/sys/kernel/core_pattern
 
 # Compilation commands with AFL++ instrumentation
+afl-clang-fast -g -o sentinel_telemetry_nosan sentinel_telemetry.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
-
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 ```
 
 sentinel_payload
