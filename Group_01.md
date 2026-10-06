@@ -63,9 +63,12 @@ sentinel_payload
 echo core | sudo tee /proc/sys/kernel/core_pattern
 
 # Compilation commands with AFL++ instrumentation
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload sentinel_payload.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
-
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_asan_ubsan sentinel_payload.c
 ```
 
 sentinel_network
@@ -95,10 +98,12 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 #### Target 2: `sentinel_payload` Seed Set
 | Seed Filename | Dimensions & Label | Payload Size | Target Branch / Parsing State Exercised |
 | :--- | :--- | :--- | :--- |
-| `seed_payload.bin` | `PAYLOAD_FRAME 8 8 1 RADAR_SCAN_01` | 64 bytes | Standard 2D observation matrix |
-| `seed_pay_2.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
-| `seed_pay_3.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
-| `seed_pay_X.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
+| `seed_payload.bin`   | `PAYLOAD_FRAME 8 8 1 RADAR_SCAN_01` | 64 bytes | Standard 2D observation matrix |
+| `seed_payload_1.bin` | `PAYLOAD_FRAME 1 1 1 A`  | 1 byte | Exercises the minimum valid label and payload boundary. |
+| `seed_payload_2.bin` | `PAYLOAD_FRAME 8 8 16 B` | 1024 bytes | Exercises the maximum valid payload boundary. |
+| `seed_payload_3.bin` | `PAYLOAD_FRAME 1 1 1 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC` | 1 byte | Exercises the maximum valid label boundary. |
+| `seed_payload_4.bin` | `PAYLOAD_FRAME 1 1 1`    | 1 byte | Exercises the jump to log_payload_error() with a single whitespace label. |
+| `seed_payload_5.bin` | `PAYLOAD_FRAME 2 4 8 E`  | 128 bytes | Exercises fread() using a valid payload larger than expected_data_size. |
 
 #### Target 3: `sentinel_network` Seed Set
 | Seed Filename | Magic Header & Type | Payload Length | Target Branch / Parsing State Exercised |
@@ -110,15 +115,31 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 
 ### 2.3 Seed Generation Methodology & Helper Scripts
 
-sentinel_telemetry: `No helper script was needed.`
+#### sentinel_telemetry: `No helper script was needed.`
 The additional seeds were manually created using the valid `key=value` format and different inputs handled by `sentinel_telemetry.c`.
 
-sentinel_payload: ~~.py
+#### sentinel_payload: `generate_seed_payload.py`
+The helper script shown below demonstrates seed generation for `seed_payload_5.bin`. The sentinel_payload program expects a file input containing a header line with exactly four values: width, height, depth, and label. A payload should follow after the newline.
+
 ```python
-## if needed (might not be necessary)
+"""
+Generate a file input for the sentinel_payload program.
+"""
+
+width = 2
+height = 4
+depth = 8
+label = "E"
+
+header_line = f"PAYLOAD_FRAME {width} {height} {depth} {label}\n"
+payload = b"E" * 128
+
+with open("seed_payload_5.bin", "wb") as f:
+    f.write(header_line.encode("ascii"))
+    f.write(payload)
 ```
 
-sentinel_network: seeds_net.py
+#### sentinel_network: seeds_net.py
 ```python
 import struct
 
