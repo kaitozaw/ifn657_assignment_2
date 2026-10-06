@@ -243,7 +243,7 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
-![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry_afl_status_screen_dict.jpg)
+![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_afl_status_screen_dict.jpg)
 
 sentinel_payload
 ```
