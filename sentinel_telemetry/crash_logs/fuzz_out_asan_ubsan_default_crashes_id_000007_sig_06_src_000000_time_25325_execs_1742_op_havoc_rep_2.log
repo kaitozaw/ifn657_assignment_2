@@ -1,0 +1,16 @@
+=================================================================
+==1595597==ERROR: AddressSanitizer: requested allocation size 0xffffffffffffffff (0x800 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0x10000000000 (thread T0)
+    #0 0x555555627a28 in malloc (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0xd3a28) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9)
+    #1 0x55555566bd94 in allocate_auxiliary_buffer /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:55:28
+    #2 0x55555566c4dd in process_telemetry_directive /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:94:21
+    #3 0x55555566d35c in parse_telemetry_line /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:161:5
+    #4 0x55555566db19 in parse_telemetry_stream /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:173:13
+    #5 0x55555566db19 in main /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:200:17
+    #6 0x7ffff7c2a600  (/usr/lib/x86_64-linux-gnu/libc.so.6+0x2a600) (BuildId: 066527e430a32768d82741e00b81eebb1a872294)
+    #7 0x7ffff7c2a717 in __libc_start_main (/usr/lib/x86_64-linux-gnu/libc.so.6+0x2a717) (BuildId: 066527e430a32768d82741e00b81eebb1a872294)
+    #8 0x555555582484 in _start (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0x2e484) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9)
+
+==1595597==HINT: if you don't care about these errors you may set allocator_may_return_null=1
+SUMMARY: AddressSanitizer: allocation-size-too-big (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0xd3a28) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) in malloc
+==1595597==ABORTING
+fuzz_out_asan_ubsan/default/crashes/id:000007,sig:06,src:000000,time:25325,execs:1742,op:havoc,rep:2

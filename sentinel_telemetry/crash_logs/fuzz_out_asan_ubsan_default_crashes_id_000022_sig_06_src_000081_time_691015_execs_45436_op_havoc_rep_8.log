@@ -1,0 +1,4 @@
+=================================================================
+==1595714==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7bfff5c00360 at pc 0x5555555abc4f bp 0x7fffffffde80 sp 0x7fffffffd630
+WRITE of size 147 at 0x7bfff5c00360 thread T0
+fuzz_out_asan_ubsan/default/crashes/id:000022,sig:06,src:000081,time:691015,execs:45436,op:havoc,rep:8
