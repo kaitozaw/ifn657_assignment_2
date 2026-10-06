@@ -360,60 +360,209 @@ xxd crash_analysis/{name}.bin
 #### 4.2.1 Vulnerability 1
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `[e.g. Format String Vulnerability in Telemetry Logger]` |
-| **CWE Classification** | `[e.g. CWE-134: Use of Externally-Controlled Format String]` |
-| **Target Component** | `[e.g. sentinel_telemetry.c]` |
-| **Vulnerable Location** | `[Function name, line number, and code snippet]` |
-| **Reproducing Input File** | `[e.g. crashes/id_000000_telemetry_crash.conf]` |
+| **Vulnerability Name** | `Stack Buffer Overflow in Telemetry Directive Status Formatting` |
+| **CWE Classification** | `CWE-121: Stack-based Buffer Overflow` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `process_telemetry_directive()` L100: `sprintf(status_output, "Directive parsed: %s=%s", formatted_key, formatted_value);` |
+| **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000000,sig:06,src:000000,time:6806,execs:477,op:havoc,rep:3` |
 
 **Triggering Input & Reproduction Command:**
-```bash
-# Provide command to reproduce the crash
+The representative input is a 70-byte telemetry line:
+```text
+auux_buffer_request=64x_buffer_requestbuffeequest=64x_buffer_reque=64
+```
 
+The parser splits the line at the first `=`:
+```text
+key   = auux_buffer_request
+value = 64x_buffer_requestbuffeequest=64x_buffer_reque=64
+```
+
+Both strings are passed to `process_telemetry_directive()` and later combined into `status_output[64]`.
+
+Reproduce under GDB:
+```bash
+gdb ./sentinel_telemetry_asan_ubsan
+```
+
+```gdb
+run findings/asan_ubsan/crashes/id:000000,sig:06,src:000000,time:6806,execs:477,op:havoc,rep:3
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+`process_telemetry_directive()` copies the parsed key and value into bounded `formatted_key[64]` and `formatted_value[128]` buffers. It then combines both strings with additional text into the smaller `status_output[64]` buffer using `sprintf()` without checking the resulting length.
+For crash `000000`, AddressSanitizer reports an 88-byte write to `status_output`, which occupies stack offsets `[288, 352)`. The invalid access begins at offset 352, immediately beyond the buffer. Crashes `000005` and `000022` reproduce the same overflow at line 100 against the same stack buffer, with different write sizes. They were therefore deduplicated as the same vulnerability.
+
 
 **GDB / Sanitiser Evidence:**
 ```text
-[Paste annotated Sanitiser error report or GDB backtrace here]
+ERROR: AddressSanitizer: stack-buffer-overflow
+WRITE of size 88
+
+#0 ... in vsprintf
+#1 ... in sprintf
+#2 ... in process_telemetry_directive
+   sentinel_telemetry.c:100:5
+#3 ... in parse_telemetry_line
+   sentinel_telemetry.c:161
+#4 ... in parse_telemetry_stream
+   sentinel_telemetry.c:173
+#5 ... in main
+   sentinel_telemetry.c:200
+
+This frame has 3 object(s):
+  [32, 96)   'formatted_key'
+  [128, 256) 'formatted_value'
+  [288, 352) 'status_output'
+                       <------ Memory access at offset 352 overflows this variable
+
+Deduplication:
+000000 → WRITE of size 88  → process_telemetry_directive():100 → status_output
+000005 → WRITE of size 89  → process_telemetry_directive():100 → status_output
+000022 → WRITE of size 147 → process_telemetry_directive():100 → status_output
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact (e.g. memory leak, DoS, arbitrary write)]`
+A crafted telemetry directive can write beyond the 64-byte `status_output` stack buffer. ASan terminates the observed execution, giving a direct denial-of-service impact. As the overflowing content originates from telemetry input, adjacent stack memory can also be corrupted. Control-flow hijacking or arbitrary code execution was not demonstrated.
 
 ---
 
 #### 4.2.2 Vulnerability 2
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `[e.g. Integer Overflow in Stream Buffer Calculation]` |
-| **CWE Classification** | `[e.g. CWE-190: Integer Overflow or Wraparound]` |
-| **Target Component** | `[e.g. sentinel_telemetry.c]` |
-| **Vulnerable Location** | `[Function name, line number, and code snippet]` |
-| **Reproducing Input File** | `[e.g. crashes/id_000001_stream_overflow.conf]` |
+| **Vulnerability Name** | `Excessive Memory Allocation from Auxiliary Buffer Request` |
+| **CWE Classification** | `CWE-789: Memory Allocation with Excessive Size Value` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `process_telemetry_directive()` L93–94 and `allocate_auxiliary_buffer()` L55 |
+| **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000007,sig:06,src:000000,time:25325,execs:1742,op:havoc,rep:2` |
 
 **Triggering Input & Reproduction Command:**
-```bash
-# Provide command to reproduce the crash
+The representative input requests an auxiliary buffer using an excessively large value:
 
+```text
+aux_buffer_request=6666666666666666666666666664?
+```
+
+The parser splits the input into:
+```text
+key   = aux_buffer_request
+value = 6666666666666666666666666664?
+```
+
+The value is passed to the `aux_buffer_request` branch in `process_telemetry_directive()`, where it is used to determine the auxiliary buffer size.
+Reproduce under GDB:
+```bash
+gdb ./sentinel_telemetry_asan_ubsan
+```
+
+```gdb
+run findings/asan_ubsan/crashes/id:000007,sig:06,src:000000,time:25325,execs:1742,op:havoc,rep:2
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+The `aux_buffer_request` value is converted with `atoi()` and cast directly to `size_t` without checking whether the requested size is within an acceptable range:
+
+```c
+size_t req_size = (size_t)atoi(formatted_value);
+char *aux = allocate_auxiliary_buffer(req_size);
+```
+
+The resulting value is passed directly to `malloc()` in `allocate_auxiliary_buffer()`. For crash `000007`, this reaches `malloc()` as an allocation request of `0xffffffffffffffff`, exceeding the supported allocation size. The missing range check therefore allows a telemetry directive to request an excessive amount of memory.
 
 **GDB / Sanitiser Evidence:**
 ```text
-[Paste annotated Sanitiser error report or GDB backtrace here]
+ERROR: AddressSanitizer: requested allocation size
+0xffffffffffffffff ... exceeds maximum supported size 0x10000000000
+
+#0 ... in malloc
+#1 ... in allocate_auxiliary_buffer
+   sentinel_telemetry.c:55:28
+#2 ... in process_telemetry_directive
+   sentinel_telemetry.c:94:21
+#3 ... in parse_telemetry_line
+   sentinel_telemetry.c:161
+#4 ... in parse_telemetry_stream
+   sentinel_telemetry.c:173
+#5 ... in main
+   sentinel_telemetry.c:200
+
+SUMMARY: AddressSanitizer: allocation-size-too-big ... in malloc
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+A crafted `aux_buffer_request` can cause an excessive memory allocation request. In the observed sanitizer execution, the allocation is rejected and the process aborts, resulting in denial of service. No memory corruption or arbitrary code execution was demonstrated.
 
 ---
 
-#### 4.2.3 Vulnerability X (numbered sequentially for each distinct vulnerability)
+#### 4.2.3 Vulnerability 3
+| Field | Details |
+| :--- | :--- |
+| **Vulnerability Name** | `Integer Overflow in Stream Buffer Size Calculation` |
+| **CWE Classification** | `CWE-190: Integer Overflow or Wraparound` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `calculate_stream_buffer_size()` L49: `size_t stream_bandwidth = num_channels * sample_rate;` |
+| **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000019,sig:04,src:000039,time:462491,execs:30699,op:havoc,rep:16` |
+
+**Triggering Input & Reproduction Command:**
+The representative AFL++ input contains the following triggering directive:
+
+```text
+stream_multiplier=44444444444444444
+```
+
+The directive is parsed as:
+```text
+key   = stream_multiplier
+value = 44444444444444444
+```
+
+The value is passed to the `stream_multiplier` branch in `process_telemetry_directive()`, converted with `atoi()`, and later used as `sample_rate` in the stream buffer size calculation.
+
+Reproduce the original AFL++ input under GDB:
+```bash
+gdb ./sentinel_telemetry_asan_ubsan
+```
+
+```gdb
+run findings/asan_ubsan/crashes/id:000019,sig:04,src:000039,time:462491,execs:30699,op:havoc,rep:16
+```
+
+**Root Cause Analysis:**
+The `stream_multiplier` value is converted with `atoi()` and stored as an `int` without explicit range validation:
+```c
+int multiplier = atoi(formatted_value);
+size_t required_size =
+    calculate_stream_buffer_size(global_telemetry->entry_count, multiplier);
+```
+
+The value is then used in the following multiplication:
+```c
+size_t stream_bandwidth = num_channels * sample_rate;
+```
+
+The oversized input reaches this arithmetic operation without a range check. GDB reproduces the crash as `SIGILL` at line 49, where `num_channels` and `sample_rate` are multiplied. Direct execution of the same input also terminates with `Illegal instruction`. Based on this arithmetic failure and the unchecked oversized input, the vulnerability is classified as CWE-190: Integer Overflow or Wraparound.
+
+**GDB / Sanitiser Evidence:**
+```text
+Program received signal SIGILL, Illegal instruction.
+
+calculate_stream_buffer_size(...)
+at sentinel_telemetry.c:49
+
+49    size_t stream_bandwidth = num_channels * sample_rate;
+```
+
+Direct execution of the same input also reproduces the failure:
+```text
+Illegal instruction
+```
+
+**Exploitability Assessment:**
+A crafted `stream_multiplier` can terminate the telemetry processor during the stream buffer size calculation, resulting in a reproducible denial of service. No memory corruption or arbitrary code execution was demonstrated.
+
+---
+
+#### 4.2.4 Vulnerability X (numbered sequentially for each distinct vulnerability)
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `[e.g. Stack Buffer Overflow in Frame Label Processing]` |
