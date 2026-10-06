@@ -1,0 +1,6 @@
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+[TELEMETRY LOG] 
+[TELEMETRY LOG] 
+Telemetry parsing complete. Processed entries: 0
+fuzz_out_asan_ubsan/default/crashes/id:000023,sig:06,src:000033,time:2301029,execs:107681,op:havoc,rep:20

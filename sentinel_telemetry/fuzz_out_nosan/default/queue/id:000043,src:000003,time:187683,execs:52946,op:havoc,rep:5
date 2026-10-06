@@ -1,0 +1,10 @@
+# 8e
+# 8e
+su=64
+sub=4
+==
+sensor_id_pry=101
+cal_factor_th=====64
+==
+log_event=d
+stream_multiplier=4

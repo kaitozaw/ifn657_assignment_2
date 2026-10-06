@@ -6,7 +6,7 @@
 ### Team Members & Workload Distribution
 | Student Name | Student ID | Email Address | Assigned Subtasks / Roles | Contribution (%) |
 | :--- | :--- | :--- | :--- | :--- |
-| `Clair Lin`   | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzz testing of sentinel_telemetry.c` | 33.3% |
+| `Claire Lin`   | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzz testing of sentinel_telemetry.c` | 33.3% |
 | `Rachel Lim`  | `[n0000002]`  | `r20.lim@connect.qut.edu.au`     | `Fuzz testing of sentinel_payload.c`   | 33.3% |
 | `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzz testing of sentinel_network.c`   | 33.3% |
 
@@ -46,12 +46,16 @@
 
 sentinel_telemetry
 ```bash
+# Environment configuration
 echo core | sudo tee /proc/sys/kernel/core_pattern
 
 # Compilation commands with AFL++ instrumentation
+afl-clang-fast -g -o sentinel_telemetry_nosan sentinel_telemetry.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
-
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 ```
 
 sentinel_payload
@@ -84,9 +88,9 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 | Seed Filename | Input Content / Syntax Summary | Target Branch / Parsing State Exercised |
 | :--- | :--- | :--- |
 | `seed_telemetry.conf` | Starter configuration with nominal directives | Base parser validation and comment handling |
-| `seed_tel_2.conf` | `[Describe content]` | `[Describe branch/rationale]` |
-| `seed_tel_3.conf` | `[Describe content]` | `[Describe branch/rationale]` |
-| `seed_tel_X.conf` | `[Describe content]` | `[Describe branch/rationale]` |
+| `seed_tel_2.conf` | `aux_buffer_request=64` | Auxiliary buffer request |
+| `seed_tel_3.conf` | Comment, blank line, and two `key=value` entries | Basic parsing with comments and blank lines |
+| `seed_tel_4.conf` | Sensor ID, calibration factor, and auxiliary buffer request | Multiple telemetry directives in one input |
 
 #### Target 2: `sentinel_payload` Seed Set
 | Seed Filename | Dimensions & Label | Payload Size | Target Branch / Parsing State Exercised |
@@ -106,10 +110,8 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 
 ### 2.3 Seed Generation Methodology & Helper Scripts
 
-sentinel_telemetry: ~~.py
-```python
-## if needed (might not be necessary)
-```
+sentinel_telemetry: `No helper script was needed.`
+The additional seeds were manually created using the valid `key=value` format and different inputs handled by `sentinel_telemetry.c`.
 
 sentinel_payload: ~~.py
 ```python
@@ -142,13 +144,31 @@ for i, data in enumerate(seeds, 1):
 
 #### sentinel_telemetry
 
+Baseline fuzzing:
 ```bash
-# Example AFL++ execution commands used by your team
-
+afl-fuzz -i seeds -o fuzz_out_nosan ./sentinel_telemetry_nosan @@
+```
+Dictionary: `dict`
+```bash
+log_event="log_event="
+stream_multiplier="stream_multiplier="
+aux_buffer_request="aux_buffer_request="
+sensor_id="sensor_id_"
+cal_factor="cal_factor_"
+delimiter="="
 ```
 
+Dictionary-assisted fuzzing:
+```bash
+afl-fuzz -i seeds -o fuzz_out_dict -x dict ./sentinel_telemetry_nosan @@
+```
+
+Sanitizer-guided fuzzing:
+```bash
+afl-fuzz -i seeds -o fuzz_out_asan_ubsan -m none ./sentinel_telemetry_asan_ubsan @@
+```
 **Technical Justification:**
-`[Explain why these options and techniques were chosen and how they improved coverage/efficiency]`
+The baseline campaign was used to check the initial fuzzing results. The dictionary included telemetry directives and `key=value` syntax to help AFL++ generate inputs that match the expected format. The dictionary campaign reached the same edge coverage as the baseline and found a slightly larger corpus. ASan and UBSan were also used to detect memory and undefined behaviour issues during fuzzing.
 
 #### sentinel_payload
 
@@ -216,16 +236,14 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 
 | Target Program | Campaign Duration | Total Executions | Execution Speed (exec/s) | Total Paths Discovered | Unique Crashes Reported |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `sentinel_telemetry` | `[e.g. 6.5 hours]` | `[e.g. 12.4M]` | `[e.g. 1,250/sec]` | `[e.g. 48 paths]` | `[e.g. 14 crashes]` | 
+| `sentinel_telemetry` | 1.16 hours | 758K | 23.67/sec | 166 paths | 24 crashes |
 | `sentinel_payload` | `[Hours]` | `[Executions]` | `[Exec/sec]` | `[Paths]` | `[Crashes]` | 
 | `sentinel_network` | 2.4 hours | 22M | 2,630/sec | 72 paths | 103 crashes |
 
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
-```
-[Insert Screenshot: sentinel_telemetry AFL++ Status Screen]
-```
+![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_afl_status_screen_dict.jpg)
 
 sentinel_payload
 ```
@@ -246,7 +264,7 @@ sentinel_network
 
 The same methodology was applied to all three targets. In the commands below, `{target}` is one of `telemetry`, `payload`, or `network`.
 
-1. replay all crashes with the ASan build and save full logs
+#### 1. replay all crashes with the ASan build and save full logs
 
 ```bash
 mkdir -p crash_logs
@@ -257,7 +275,7 @@ for f in findings/*/crashes/id:*; do
 done
 ```
 
-2. build a bucket key (error type + top 3 frames) for each crash
+#### 2. build a bucket key (error type + top 3 frames) for each crash
 
 ```bash
 for log in crash_logs/*.log; do
@@ -278,7 +296,7 @@ for log in crash_logs/*.log; do
 done > crash_buckets.tsv
 ```
 
-3. count crashes per bucket, pick one representative crash and minimise it
+#### 3. count crashes per bucket, pick one representative crash and minimise it
 
 ```bash
 mkdir -p crash_analysis
@@ -298,13 +316,38 @@ awk -F'\t' '
   done
 ```
 
-4. inspect the sanitizer report for each representative file and match it against the source code
+#### 4. validate and inspect each representative crash
 
+After minimisation, verify whether a valid minimised `.bin` file is produced and still reproduces the crash. Follow Step 4-1 if a valid minimised file is available; otherwise, follow Step 4-2 using the original representative crash.
+
+##### 4-1. inspect a successfully minimised representative
 ```bash
 ./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin
 ```
 
-5. decode the input as a packet sequence (`network` only)
+##### 4-2. Inspect the original representative if no valid minimised file is available
+
+If no valid minimised `.bin` file is produced, use the original representative crash instead:
+
+```bash
+./sentinel_{target}_asan_ubsan {original_representative_crash}
+```
+
+If the result is unclear, check the crash manually with GDB:
+
+```bash
+gdb ./sentinel_{target}_asan_ubsan
+```
+
+Then run:
+
+```gdb
+run {original_representative_crash}
+```
+
+Check the sanitizer/GDB output against the source code.
+
+#### 5. decode the input as a packet sequence (`network` only)
 
 ```bash
 xxd crash_analysis/{name}.bin
