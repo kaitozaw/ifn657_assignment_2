@@ -264,7 +264,7 @@ sentinel_network
 
 The same methodology was applied to all three targets. In the commands below, `{target}` is one of `telemetry`, `payload`, or `network`.
 
-1. replay all crashes with the ASan build and save full logs
+#### 1. replay all crashes with the ASan build and save full logs
 
 ```bash
 mkdir -p crash_logs
@@ -275,7 +275,7 @@ for f in findings/*/crashes/id:*; do
 done
 ```
 
-2. build a bucket key (error type + top 3 frames) for each crash
+#### 2. build a bucket key (error type + top 3 frames) for each crash
 
 ```bash
 for log in crash_logs/*.log; do
@@ -296,7 +296,7 @@ for log in crash_logs/*.log; do
 done > crash_buckets.tsv
 ```
 
-3. count crashes per bucket, pick one representative crash and minimise it
+#### 3. count crashes per bucket, pick one representative crash and minimise it
 
 ```bash
 mkdir -p crash_analysis
@@ -316,13 +316,38 @@ awk -F'\t' '
   done
 ```
 
-4. inspect the sanitizer report for each representative file and match it against the source code
+#### 4. validate and inspect each representative crash
 
+After minimisation, verify whether a valid minimised `.bin` file is produced and still reproduces the crash. Follow Step 4-1 if a valid minimised file is available; otherwise, follow Step 4-2 using the original representative crash.
+
+##### 4-1. inspect a successfully minimised representative
 ```bash
 ./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin
 ```
 
-5. decode the input as a packet sequence (`network` only)
+##### 4-2. Inspect the original representative if no valid minimised file is available
+
+If no valid minimised `.bin` file is produced, use the original representative crash instead:
+
+```bash
+./sentinel_{target}_asan_ubsan {original_representative_crash}
+```
+
+If the result is unclear, check the crash manually with GDB:
+
+```bash
+gdb ./sentinel_{target}_asan_ubsan
+```
+
+Then run:
+
+```gdb
+run {original_representative_crash}
+```
+
+Check the sanitizer/GDB output against the source code.
+
+#### 5. decode the input as a packet sequence (`network` only)
 
 ```bash
 xxd crash_analysis/{name}.bin
