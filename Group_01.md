@@ -69,6 +69,10 @@ afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload sentinel_payload.c
 export AFL_USE_ASAN=1
 export AFL_USE_UBSAN=1
 afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_asan_ubsan sentinel_payload.c
+
+# Compilation commands with MemorySanitizer
+export AFL_USE_MSAN=1
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_msan sentinel_payload.c
 ```
 
 sentinel_network
@@ -193,9 +197,16 @@ The baseline campaign was used to check the initial fuzzing results. The diction
 
 #### sentinel_payload
 
-```bash
-# Example AFL++ execution commands used by your team
+Parallel, dictionary-assisted fuzzing was conducted on:
+- An AFL++ instrumented and unsanitised sentinel_payload program.
+- An AFL++ instrumented with ASan and UBSan enabled sentinel_payload program.
+- An AFL++ instrumented with MSan enabled sentinel_payload program.
 
+```bash
+echo core | sudo tee /proc/sys/kernel/core_pattern
+afl-fuzz -i seeds -o out -x sentinel_payload_dict -m none -M fuzzer01 ./sentinel_payload @@
+afl-fuzz -i seeds -o out -x sentinel_payload_dict -m none -S fuzzer02 ./sentinel_payload_asan_ubsan @@
+afl-fuzz -i seeds -o out -x sentinel_payload_dict -m none -S fuzzer03 ./sentinel_payload_msan @@
 ```
 
 **Technical Justification:**
