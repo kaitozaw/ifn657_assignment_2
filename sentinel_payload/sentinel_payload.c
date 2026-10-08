@@ -132,7 +132,7 @@ int parse_payload_file(FILE *fp) {
     return 0;
 }
 
-int main(int argc, char **argv) {
+int old_main(int argc, char **argv) {
     if (argc != 2) {
         fprintf(stderr, "Usage: %s <payload_binary_file>\n", argv[0]);
         return 1;
@@ -153,3 +153,10 @@ int main(int argc, char **argv) {
     return (result == 0) ? 0 : 1;
 }
 
+int main(int argc, char **argv) {
+    int res = 0;
+    while (__AFL_LOOP(10000)) {
+        res = old_main(argc, argv);
+    }
+    return res;
+}

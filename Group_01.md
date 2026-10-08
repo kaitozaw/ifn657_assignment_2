@@ -60,8 +60,6 @@ afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 
 sentinel_payload
 ```bash
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
 afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload sentinel_payload.c
 
@@ -197,7 +195,40 @@ The baseline campaign was used to check the initial fuzzing results. The diction
 
 #### sentinel_payload
 
-A simple fuzzer dictionary, `sentinel_payload.dict`, was created to improve fuzzer mutations:
+To enable persistent mode, the `main()` function in `sentinel_payload.c` was modified:
+
+```c
+int old_main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <payload_binary_file>\n", argv[0]);
+        return 1;
+    }
+    
+    FILE *fp = fopen(argv[1], "rb");
+    if (!fp) {
+        perror("Failed to open scientific payload file");
+        return 1;
+    }
+    
+    printf("=== Sentinel-1 Scientific Payload Ingestion Subsystem ===\n");
+    int result = parse_payload_file(fp);
+    
+    fclose(fp);
+    cleanup_active_frame();
+    
+    return (result == 0) ? 0 : 1;
+}
+
+int main(int argc, char **argv) {
+    int res = 0;
+    while (__AFL_LOOP(10000)) {
+        res = old_main(argc, argv);
+    }
+    return res;
+}
+```
+
+To improve fuzzer mutations, a simple fuzzer dictionary (i.e., `sentinel_payload.dict`) was created:
 
 ```
 header="PAYLOAD_FRAME"
@@ -213,14 +244,20 @@ Parallel, dictionary-assisted fuzzing was conducted on:
 
 ```bash
 echo core | sudo tee /proc/sys/kernel/core_pattern
-afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M fuzzer01 ./sentinel_payload @@
-afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S fuzzer02 ./sentinel_payload_asan_ubsan @@
-afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S fuzzer03 ./sentinel_payload_msan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M nosan ./sentinel_payload @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S asan_ubsan ./sentinel_payload_asan_ubsan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S msan ./sentinel_payload_msan @@
 ```
 
-**Technical Justification:** The fuzzer dictionary, `sentinel_payload.dict`, was used to ensure that generated file inputs contained the minimum required structure to pass the initial header line validation. More specifically, the file input must contain the string `PAYLOAD_FRAME` preceding `width`, `height`, and `depth` values for further processing. The fuzzer dictionary also includes format string and use-after-free (UAF) triggers, allowing exploration of distinct execution paths and vulnerabilities.
+**Technical Justification:**
 
-Parallelisation was utilised to run multiple fuzzing instances simultaneously, each targeting different AFL++ instrumention variants of the `sentinel_payload` program. This increases overall throughput of the fuzzing process and allows different execution paths to be explored concurrently. Additionally, the `-m none` option was applied to all fuzzers to remove the memory limit, further improving execution speed.
+Enabling persistent mode in AFL++ removes the significant overhead associated with restarting the process after every test case. This improves fuzzing efficiency and execution speed, allowing a greater number of test cases to be executed per second.
+
+The fuzzer dictionary, `sentinel_payload.dict`, was used to ensure that generated inputs contained the minimum required structure to pass the initial header line validation. Specifically, inputs must contain the string `PAYLOAD_FRAME`, followed by `width`, `height`, `depth`, and `label` values, in order to reach subsequent processing functions. The dictionary also includes format string and use-after-free (UAF) triggers, enabling the exploration of distinct execution paths and increasing the likelihood of exposing vulnerabilities.
+
+Parallelisation was utilised to run multiple fuzzing instances simultaneously. Each instance targeted different AFL++ instrumentation variants of the `sentinel_payload` program. This increases overall throughput and enables different execution paths to be explored concurrently.
+
+Lastly, the `-m none` option was applied to all fuzzing instances to disable AFL++'s memory limit. This further improved execution speeds.
 
 #### sentinel_network
 
