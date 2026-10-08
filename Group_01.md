@@ -72,7 +72,7 @@ afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_asan_ubsan sentinel_paylo
 
 # Compilation commands with MemorySanitizer
 export AFL_USE_MSAN=1
-afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_msan sentinel_payload.c
+afl-clang-fast -std=c99 -w -g -o sentinel_payload_msan sentinel_payload.c
 ```
 
 sentinel_network
