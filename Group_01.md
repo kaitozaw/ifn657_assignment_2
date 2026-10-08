@@ -197,6 +197,15 @@ The baseline campaign was used to check the initial fuzzing results. The diction
 
 #### sentinel_payload
 
+A simple fuzzer dictionary, `sentinel_payload.dict`, was created to improve fuzzer mutations:
+
+```
+header="PAYLOAD_FRAME"
+format_string_trigger_1="%n"
+format_string_trigger_2="%x"
+uaf_trigger="1337"
+```
+
 Parallel, dictionary-assisted fuzzing was conducted on:
 - An AFL++ instrumented and unsanitised sentinel_payload program.
 - An AFL++ instrumented with ASan and UBSan enabled sentinel_payload program.
@@ -204,13 +213,14 @@ Parallel, dictionary-assisted fuzzing was conducted on:
 
 ```bash
 echo core | sudo tee /proc/sys/kernel/core_pattern
-afl-fuzz -i seeds -o out -x sentinel_payload_dict -m none -M fuzzer01 ./sentinel_payload @@
-afl-fuzz -i seeds -o out -x sentinel_payload_dict -m none -S fuzzer02 ./sentinel_payload_asan_ubsan @@
-afl-fuzz -i seeds -o out -x sentinel_payload_dict -m none -S fuzzer03 ./sentinel_payload_msan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M fuzzer01 ./sentinel_payload @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S fuzzer02 ./sentinel_payload_asan_ubsan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S fuzzer03 ./sentinel_payload_msan @@
 ```
 
-**Technical Justification:**
-`[Explain why these options and techniques were chosen and how they improved coverage/efficiency]`
+**Technical Justification:** The fuzzer dictionary, `sentinel_payload.dict`, was used to ensure that generated file inputs contained the minimum required structure to pass the initial header line validation. More specifically, the file input must contain the string `PAYLOAD_FRAME` preceding `width`, `height`, and `depth` values for further processing. The fuzzer dictionary also includes format string and use-after-free (UAF) triggers, allowing exploration of distinct execution paths and vulnerabilities.
+
+Parallelisation was utilised to run multiple fuzzing instances simultaneously, each targeting different AFL++ instrumention variants of the `sentinel_payload` program. This increases overall throughput of the fuzzing process and allows different execution paths to be explored concurrently. Additionally, the `-m none` option was applied to all fuzzers to remove the memory limit, further improving execution speed.
 
 #### sentinel_network
 
