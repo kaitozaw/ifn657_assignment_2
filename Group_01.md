@@ -317,18 +317,21 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 | Target Program | Campaign Duration | Total Executions | Execution Speed (exec/s) | Total Paths Discovered | Unique Crashes Reported |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `sentinel_telemetry` | 1.16 hours | 758K | 23.67/sec | 166 paths | 24 crashes |
-| `sentinel_payload` | 2.5 hours | 86M | 29,231/sec | `[Paths]` | 12 crashes | 
+| `sentinel_payload` | 3.0 hours | 67M | 18,582/sec | 24 paths | 12 crashes | 
 | `sentinel_network` | 2.4 hours | 22M | 2,630/sec | 72 paths | 103 crashes |
 
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
+
 ![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_afl_status_screen_dict.jpg)
 
 sentinel_payload
-```
-[Insert Screenshot: sentinel_payload AFL++ Status Screen]
-```
+
+![sentinel_payload_nosan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_01_nosan.png)
+![sentinel_payload_asan_ubsan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_02_asan_ubsan.png)
+![sentinel_payload_msan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_03_msan.png)
+![sentinel_payload AFL++ Summary Stats](images/sentinel_payload/sentinel_payload_04_aggregate_stats.png)
 
 sentinel_network
 
