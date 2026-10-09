@@ -61,7 +61,7 @@ afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 sentinel_payload
 ```bash
 # Compilation commands with AFL++ instrumentation
-afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload sentinel_payload.c
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_nosan sentinel_payload.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
 export AFL_USE_ASAN=1
@@ -222,6 +222,7 @@ int old_main(int argc, char **argv) {
 int main(int argc, char **argv) {
     int res = 0;
     while (__AFL_LOOP(10000)) {
+        global_frame = NULL;
         res = old_main(argc, argv);
     }
     return res;
@@ -244,7 +245,7 @@ Parallel, dictionary-assisted fuzzing was conducted on:
 
 ```bash
 echo core | sudo tee /proc/sys/kernel/core_pattern
-afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M nosan ./sentinel_payload @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M nosan ./sentinel_payload_nosan @@
 afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S asan_ubsan ./sentinel_payload_asan_ubsan @@
 afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S msan ./sentinel_payload_msan @@
 ```

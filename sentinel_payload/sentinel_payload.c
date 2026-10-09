@@ -156,6 +156,7 @@ int old_main(int argc, char **argv) {
 int main(int argc, char **argv) {
     int res = 0;
     while (__AFL_LOOP(10000)) {
+        global_frame = NULL;
         res = old_main(argc, argv);
     }
     return res;
