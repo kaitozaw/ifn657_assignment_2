@@ -1,0 +1,62 @@
+=================================================================
+==1853225==ERROR: AddressSanitizer: heap-use-after-free on address 0xf4f00f54 at pc 0x56721b2e bp 0xff8d5708 sp 0xff8d5700
+READ of size 4 at 0xf4f00f54 thread T0
+    #0 0x56721b2d in inspect_cached_frame /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:56:71
+    #1 0x56721b2d in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:129:9
+    #2 0x56721c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x56722147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7b30f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #5 0xf7b31097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0x56634636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+0xf4f00f54 is located 4 bytes inside of 44-byte region [0xf4f00f50,0xf4f00f7c)
+freed by thread T0 here:
+    #0 0x566d6a8e in free (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbea8e) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x56721751 in cleanup_active_frame /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:49:9
+    #2 0x56721751 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:128:9
+    #3 0x56721c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x56722147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7b30f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+previously allocated by thread T0 here:
+    #0 0x566d6d11 in malloc (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbed11) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x56721059 in process_payload_data /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:67:43
+    #2 0x5672160e in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:122:5
+    #3 0x56721c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x56722147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7b30f5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:56:71 in inspect_cached_frame
+Shadow bytes around the buggy address:
+  0xf4f00c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f00d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f00d80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f00e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f00e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xf4f00f00: fa fa fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd
+  0xf4f00f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f01000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f01080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f01100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4f01180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1853225==ABORTING
+out/asan_ubsan/crashes/id:000003,sig:06,src:000007,time:795,execs:3840,op:havoc,rep:1

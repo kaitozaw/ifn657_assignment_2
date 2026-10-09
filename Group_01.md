@@ -6,8 +6,8 @@
 ### Team Members & Workload Distribution
 | Student Name | Student ID | Email Address | Assigned Subtasks / Roles | Contribution (%) |
 | :--- | :--- | :--- | :--- | :--- |
-| `Claire Lin`   | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzz testing of sentinel_telemetry.c` | 33.3% |
-| `Rachel Lim`  | `[n0000002]`  | `r20.lim@connect.qut.edu.au`     | `Fuzz testing of sentinel_payload.c`   | 33.3% |
+| `Claire Lin`  | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzz testing of sentinel_telemetry.c` | 33.3% |
+| `Rachel Lim`  | `[n12284181]` | `r20.lim@connect.qut.edu.au`     | `Fuzz testing of sentinel_payload.c`   | 33.3% |
 | `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzz testing of sentinel_network.c`   | 33.3% |
 
 **Submission Files (Canvas):**
@@ -60,12 +60,17 @@ afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 
 sentinel_payload
 ```bash
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_nosan sentinel_payload.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_asan_ubsan sentinel_payload.c
 
+# Compilation commands with MemorySanitizer
+export AFL_USE_MSAN=1
+afl-clang-fast -std=c99 -w -g -o sentinel_payload_msan sentinel_payload.c
 ```
 
 sentinel_network
@@ -95,10 +100,12 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 #### Target 2: `sentinel_payload` Seed Set
 | Seed Filename | Dimensions & Label | Payload Size | Target Branch / Parsing State Exercised |
 | :--- | :--- | :--- | :--- |
-| `seed_payload.bin` | `PAYLOAD_FRAME 8 8 1 RADAR_SCAN_01` | 64 bytes | Standard 2D observation matrix |
-| `seed_pay_2.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
-| `seed_pay_3.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
-| `seed_pay_X.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
+| `seed_payload.bin`   | `PAYLOAD_FRAME 8 8 1 RADAR_SCAN_01` | 64 bytes | Standard 2D observation matrix |
+| `seed_payload_1.bin` | `PAYLOAD_FRAME 1 1 1 A`  | 1 byte | Exercises the minimum valid label and payload boundary. |
+| `seed_payload_2.bin` | `PAYLOAD_FRAME 8 8 16 B` | 1024 bytes | Exercises the maximum valid payload boundary. |
+| `seed_payload_3.bin` | `PAYLOAD_FRAME 1 1 1 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC` | 1 byte | Exercises the maximum valid label boundary. |
+| `seed_payload_4.bin` | `PAYLOAD_FRAME 1 1 1`    | 1 byte | Exercises the jump to log_payload_error() with a single whitespace label. |
+| `seed_payload_5.bin` | `PAYLOAD_FRAME 2 4 8 E`  | 128 bytes | Exercises fread() using a valid payload larger than expected_data_size. |
 
 #### Target 3: `sentinel_network` Seed Set
 | Seed Filename | Magic Header & Type | Payload Length | Target Branch / Parsing State Exercised |
@@ -110,15 +117,31 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 
 ### 2.3 Seed Generation Methodology & Helper Scripts
 
-sentinel_telemetry: `No helper script was needed.`
+#### sentinel_telemetry: `No helper script was needed.`
 The additional seeds were manually created using the valid `key=value` format and different inputs handled by `sentinel_telemetry.c`.
 
-sentinel_payload: ~~.py
+#### sentinel_payload: `generate_seed_payload.py`
+The helper script shown below demonstrates seed generation for `seed_payload_5.bin`. The sentinel_payload program expects a file input containing a header line with exactly four values: width, height, depth, and label. A payload should follow after the newline.
+
 ```python
-## if needed (might not be necessary)
+"""
+Generate a file input for the sentinel_payload program.
+"""
+
+width = 2
+height = 4
+depth = 8
+label = "E"
+
+header_line = f"PAYLOAD_FRAME {width} {height} {depth} {label}\n"
+payload = b"E" * 128
+
+with open("seed_payload_5.bin", "wb") as f:
+    f.write(header_line.encode("ascii"))
+    f.write(payload)
 ```
 
-sentinel_network: seeds_net.py
+#### sentinel_network: seeds_net.py
 ```python
 import struct
 
@@ -172,13 +195,70 @@ The baseline campaign was used to check the initial fuzzing results. The diction
 
 #### sentinel_payload
 
-```bash
-# Example AFL++ execution commands used by your team
+To enable persistent mode, the `main()` function in `sentinel_payload.c` was modified:
 
+```c
+int old_main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <payload_binary_file>\n", argv[0]);
+        return 1;
+    }
+    
+    FILE *fp = fopen(argv[1], "rb");
+    if (!fp) {
+        perror("Failed to open scientific payload file");
+        return 1;
+    }
+    
+    printf("=== Sentinel-1 Scientific Payload Ingestion Subsystem ===\n");
+    int result = parse_payload_file(fp);
+    
+    fclose(fp);
+    cleanup_active_frame();
+    
+    return (result == 0) ? 0 : 1;
+}
+
+int main(int argc, char **argv) {
+    int res = 0;
+    while (__AFL_LOOP(10000)) {
+        global_frame = NULL;
+        res = old_main(argc, argv);
+    }
+    return res;
+}
+```
+
+To improve fuzzer mutations, a simple fuzzer dictionary (i.e., `sentinel_payload.dict`) was created:
+
+```
+header="PAYLOAD_FRAME"
+format_string_trigger_1="%n"
+format_string_trigger_2="%x"
+uaf_trigger="1337"
+```
+
+Parallel, dictionary-assisted fuzzing was conducted on:
+- An AFL++ instrumented and unsanitised sentinel_payload program.
+- An AFL++ instrumented with ASan and UBSan enabled sentinel_payload program.
+- An AFL++ instrumented with MSan enabled sentinel_payload program.
+
+```bash
+echo core | sudo tee /proc/sys/kernel/core_pattern
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M nosan ./sentinel_payload_nosan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S asan_ubsan ./sentinel_payload_asan_ubsan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S msan ./sentinel_payload_msan @@
 ```
 
 **Technical Justification:**
-`[Explain why these options and techniques were chosen and how they improved coverage/efficiency]`
+
+Enabling persistent mode in AFL++ removes the significant overhead associated with restarting the process after every test case. This improves fuzzing efficiency and execution speed, allowing a greater number of test cases to be executed per second.
+
+The fuzzer dictionary, `sentinel_payload.dict`, was used to ensure that generated inputs contained the minimum required structure to pass the initial header line validation. Specifically, inputs must contain the string `PAYLOAD_FRAME`, followed by `width`, `height`, `depth`, and `label` values, in order to reach subsequent processing functions. The dictionary also includes format string and use-after-free (UAF) triggers, enabling the exploration of distinct execution paths and increasing the likelihood of exposing vulnerabilities.
+
+Parallelisation was utilised to run multiple fuzzing instances simultaneously. Each instance targeted different AFL++ instrumentation variants of the `sentinel_payload` program. This increases overall throughput and enables different execution paths to be explored concurrently.
+
+Lastly, the `-m none` option was applied to all fuzzing instances to disable AFL++'s memory limit. This further improved execution speeds.
 
 #### sentinel_network
 
@@ -237,18 +317,21 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 | Target Program | Campaign Duration | Total Executions | Execution Speed (exec/s) | Total Paths Discovered | Unique Crashes Reported |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `sentinel_telemetry` | 1.16 hours | 758K | 23.67/sec | 166 paths | 24 crashes |
-| `sentinel_payload` | `[Hours]` | `[Executions]` | `[Exec/sec]` | `[Paths]` | `[Crashes]` | 
+| `sentinel_payload` | 3.0 hours | 67M | 18,582/sec | 24 paths | 12 crashes | 
 | `sentinel_network` | 2.4 hours | 22M | 2,630/sec | 72 paths | 103 crashes |
 
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
+
 ![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_afl_status_screen_dict.jpg)
 
 sentinel_payload
-```
-[Insert Screenshot: sentinel_payload AFL++ Status Screen]
-```
+
+![sentinel_payload_nosan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_01_nosan.png)
+![sentinel_payload_asan_ubsan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_02_asan_ubsan.png)
+![sentinel_payload_msan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_03_msan.png)
+![sentinel_payload AFL++ Summary Stats](images/sentinel_payload/sentinel_payload_04_aggregate_stats.png)
 
 sentinel_network
 
