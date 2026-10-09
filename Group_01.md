@@ -317,7 +317,7 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 | Target Program | Campaign Duration | Total Executions | Execution Speed (exec/s) | Total Paths Discovered | Unique Crashes Reported |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `sentinel_telemetry` | 1.16 hours | 758K | 23.67/sec | 166 paths | 24 crashes |
-| `sentinel_payload` | `[Hours]` | `[Executions]` | `[Exec/sec]` | `[Paths]` | `[Crashes]` | 
+| `sentinel_payload` | 2.5 hours | 86M | 29,231/sec | `[Paths]` | 12 crashes | 
 | `sentinel_network` | 2.4 hours | 22M | 2,630/sec | 72 paths | 103 crashes |
 
 ### 3.3 AFL++ Status Console Screenshots

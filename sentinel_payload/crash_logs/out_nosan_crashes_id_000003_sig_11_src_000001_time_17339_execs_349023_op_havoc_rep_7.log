@@ -1,0 +1,53 @@
+=================================================================
+==1853286==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf5800791 at pc 0x565985bd bp 0xffd920c8 sp 0xffd91c9c
+WRITE of size 25 at 0xf5800791 thread T0
+    #0 0x565985bc in fread (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x566665ec in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:119:27
+    #2 0x56666c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x56667147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7bcdf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #5 0xf7bce097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0x56579636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+0xf5800791 is located 0 bytes after 1-byte region [0xf5800790,0xf5800791)
+allocated by thread T0 here:
+    #0 0x5661bd11 in malloc (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbed11) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x566665d3 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:113:33
+    #2 0x56666c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x56667147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7bcdf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) in fread
+Shadow bytes around the buggy address:
+  0xf5800500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xf5800780: fa fa[01]fa fa fa 00 00 fa fa fa fa fa fa fa fa
+  0xf5800800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5800a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1853286==ABORTING
+out/nosan/crashes/id:000003,sig:11,src:000001,time:17339,execs:349023,op:havoc,rep:7
