@@ -46,9 +46,6 @@
 
 sentinel_telemetry
 ```bash
-# Environment configuration
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
 afl-clang-fast -g -o sentinel_telemetry_nosan sentinel_telemetry.c
 
@@ -75,8 +72,6 @@ afl-clang-fast -std=c99 -w -g -o sentinel_payload_msan sentinel_payload.c
 
 sentinel_network
 ```bash
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
 afl-clang-fast -m32 -std=c99 -w -g -o sentinel_network_nosan sentinel_network.c
 
@@ -196,7 +191,6 @@ The baseline campaign was used to check the initial fuzzing results. The diction
 #### sentinel_payload
 
 To enable persistent mode, the `main()` function in `sentinel_payload.c` was modified:
-
 ```c
 int old_main(int argc, char **argv) {
     if (argc != 2) {
@@ -230,7 +224,6 @@ int main(int argc, char **argv) {
 ```
 
 To improve fuzzer mutations, a simple fuzzer dictionary (i.e., `sentinel_payload.dict`) was created:
-
 ```
 header="PAYLOAD_FRAME"
 format_string_trigger_1="%n"
@@ -251,7 +244,6 @@ afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S msan ./sentinel_pay
 ```
 
 **Technical Justification:**
-
 Enabling persistent mode in AFL++ removes the significant overhead associated with restarting the process after every test case. This improves fuzzing efficiency and execution speed, allowing a greater number of test cases to be executed per second.
 
 The fuzzer dictionary, `sentinel_payload.dict`, was used to ensure that generated inputs contained the minimum required structure to pass the initial header line validation. Specifically, inputs must contain the string `PAYLOAD_FRAME`, followed by `width`, `height`, `depth`, and `label` values, in order to reach subsequent processing functions. The dictionary also includes format string and use-after-free (UAF) triggers, enabling the exploration of distinct execution paths and increasing the likelihood of exposing vulnerabilities.
@@ -344,11 +336,9 @@ sentinel_network
 ## 4. Task 3: Vulnerability Analysis
 
 ### 4.1 Crash Triage Methodology
-
 The same methodology was applied to all three targets. In the commands below, `{target}` is one of `telemetry`, `payload`, or `network`.
 
 #### 1. replay all crashes with the ASan build and save full logs
-
 ```bash
 mkdir -p crash_logs
 for f in findings/*/crashes/id:*; do
@@ -359,7 +349,6 @@ done
 ```
 
 #### 2. build a bucket key (error type + top 3 frames) for each crash
-
 ```bash
 for log in crash_logs/*.log; do
   key=$(awk '
@@ -380,7 +369,6 @@ done > crash_buckets.tsv
 ```
 
 #### 3. count crashes per bucket, pick one representative crash and minimise it
-
 ```bash
 mkdir -p crash_analysis
 declare -A num                                                   # per-error-type counter
@@ -400,7 +388,6 @@ awk -F'\t' '
 ```
 
 #### 4. validate and inspect each representative crash
-
 After minimisation, verify whether a valid minimised `.bin` file is produced and still reproduces the crash. Follow Step 4-1 if a valid minimised file is available; otherwise, follow Step 4-2 using the original representative crash.
 
 ##### 4-1. inspect a successfully minimised representative
@@ -409,21 +396,17 @@ After minimisation, verify whether a valid minimised `.bin` file is produced and
 ```
 
 ##### 4-2. Inspect the original representative if no valid minimised file is available
-
 If no valid minimised `.bin` file is produced, use the original representative crash instead:
-
 ```bash
 ./sentinel_{target}_asan_ubsan {original_representative_crash}
 ```
 
 If the result is unclear, check the crash manually with GDB:
-
 ```bash
 gdb ./sentinel_{target}_asan_ubsan
 ```
 
 Then run:
-
 ```gdb
 run {original_representative_crash}
 ```
@@ -431,7 +414,6 @@ run {original_representative_crash}
 Check the sanitizer/GDB output against the source code.
 
 #### 5. decode the input as a packet sequence (`network` only)
-
 ```bash
 xxd crash_analysis/{name}.bin
 ```
@@ -612,7 +594,7 @@ The `calculate_telecommand_payload_size()` function contains a logic flaw. The p
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+The exploitability of this vulnerability is limited to denial of service. The integer underflow causes `memcpy` to copy approximately 4 GB of data into a 1024-byte buffer, so the write inevitably runs past the end of the heap into unmapped (or read-only) memory. This immediately terminates the program with a segmentation fault. Because an attacker cannot control the length of the write, the program crashes before any corrupted heap metadata or adjacent chunks are used, making this unsuitable for further exploitation.
 
 ---
 
@@ -649,14 +631,14 @@ WRITE of size 12 at 0xe5e00754 thread T0
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+This vulnerability is considerably more exploitable than Vulnerability 12. Unlike the previous overflow, it overwrites only 8 bytes past the allocated buffer, so the program does not crash immediately. Since these 8 bytes are fully attacker-controlled, they can corrupt the header metadata of the next heap chunk, which can lead to various attack paths. Nevertheless, heap protection mechanisms and ASLR make reliable exploitation more difficult.
 
 ---
 
 #### 4.2.14 Vulnerability 14
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `Heap Use After Free in Active Telecommands` |
+| **Vulnerability Name** | `Heap Use After Free and Double Free in Active Telecommands` |
 | **CWE Classification** | `CWE-416: Use After Free` + `CWE-415: Double Free` |
 | **Target Component** | `sentinel_network.c]` |
 | **Vulnerable Location** | `emergency_command_cleanup()` L81-84 (root cause) → `release_telecommand_record()` L73 (crash site): `if (msg->buffer) {` |
@@ -698,7 +680,7 @@ READ of size 4 at 0xe5c00790 thread T0
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+ Although UAF and double-free vulnerabilities are significantly difficult to exploit owing to heap protection mechanisms and ASLR, they can lead to critical memory corruption once those measures are bypassed. For example, if a double-free places the same chunk onto the free list twice, the attacker can reclaim it with `malloc` and overwrite its forward pointer (the link to the next free chunk) with an attacker-chosen address. A subsequent `malloc` then returns that address, and the following `memcpy` injects attacker-controlled data into it.
 
 ---
 
@@ -706,7 +688,7 @@ READ of size 4 at 0xe5c00790 thread T0
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Misaligned Packet Header Access on Unaligned Stream Offset` |
-| **CWE Classification** | `CWE-1319: Improper Protection against Unaligned Access` |
+| **CWE Classification** | `CWE-758: Reliance on Undefined, Unspecified, or Implementation-Defined Behavior` |
 | **Target Component** | `sentinel_network.c` |
 | **Vulnerable Location** | `validate_packet_integrity()` L94 (crash site): `if (pkt->magic != PROTOCOL_MAGIC_HEADER) {` |
 | **Reproducing Input File** | `crash_analysis/illegal-instruction01.bin` |
@@ -737,7 +719,7 @@ Program received signal SIGILL, Illegal instruction.
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+The impact is limited to denial of service. This is undefined behavior (a misaligned access) rather than a flaw that lets an attacker control what is read from or written to memory. A normal build does not crash, but the UBSan build traps the misaligned access and terminates with SIGILL.
 
 ---
 
@@ -787,7 +769,7 @@ Using `pkt->length` directly (it already excludes the header) removes the subtra
 payload_size = pkt->length;
 ```
 **Technical Justification:**
-Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 4-byte heap overflow.
+Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 8-byte heap overflow.
 
 #### Patch for Vulnerability 14 (`sentinel_network.c`):
 ```c
