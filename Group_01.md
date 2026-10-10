@@ -506,6 +506,394 @@ xxd crash_analysis/{name}.bin
 
 ---
 
+#### 4.2.7 `sentinel_payload` Vulnerability 1
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Heap Buffer Overflow |
+| CWE Classification     | CWE-122: Heap-Based Buffer Overflow |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `fread()`, line 119, `fread(stream_data, 1, expected_data_size, fp);` |
+| Reproducing Input File | `sentinel_payload/out/nosan/crashes/id\:000003\,sig\:11\,src\:000001\,time\:17339\,execs\:349023\,op\:havoc\,rep\:7` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B
+%PAYLOAD_FRAME 1 1 0 
+xA
+```
+
+```bash
+./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | `1`   |
+| `height`       | `1`   |
+| `depth`        | `1111111111111111111` |
+| `label_buffer` | `BBBBB1111` |
+
+The value of `depth` is formatted into a 32-bit unsigned integer with the `%u` format specifier. However, 32-bit unsigned integers can only hold up to 4,294,967,295 values (i.e., 2 ^ (32 - 1)). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, the `%u` format specifier is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
+
+When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is essentially allocated a memory size of `4294967295 + 1`. This evaluates to `0` and causes the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25 bytes read into a 0-byte memory.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+Processing observation frame label: BBBBB1111
+Payload frame dimensions: 1 x 1 x 4294967295 (4294967295 bytes required)
+=================================================================
+==1873==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf5700791 at pc 0x5665c5bd bp 0xffebcf48 sp 0xffebcb1c
+WRITE of size 25 at 0xf5700791 thread T0
+    #0 0x5665c5bc in fread (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672a5ec in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:119:27
+    #2 0x5672ac72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x5672b147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7b4af5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #5 0xf7b4b097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0x5663d636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+0xf5700791 is located 0 bytes after 1-byte region [0xf5700790,0xf5700791)
+allocated by thread T0 here:
+    #0 0x566dfd11 in malloc (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbed11) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672a5d3 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:113:33
+    #2 0x5672ac72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x5672b147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7b4af5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) in fread
+Shadow bytes around the buggy address:
+  0xf5700500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xf5700780: fa fa[01]fa fa fa 00 00 fa fa fa fa fa fa fa fa
+  0xf5700800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1873==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The heap buffer overflow vulnerability can impact the availability of the system. Successful exploitation can result in denial of service by crashing. According to CWE, CWE-122 Heap-Based Buffer Overflow has a high likelihood of exploitation. An attacker can easily supply a value exceeding the maximum limit of a 32-bit unsigned integer. The likelihood is further increased by the expanded attack surface, as the system expects and processes three user-supplied unsigned integer values (i.e., `width`, `height`, and `depth`) from the payload's header line, each of which could potentially trigger the heap buffer overflow. The non-zero risk of human error and lack of user input validation is another contributing factor. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+
+---
+
+#### 4.2.8 `sentinel_payload` Vulnerability 2
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Heap Use-After-Free |
+| CWE Classification     | CWE-416: Use After Free |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `inspect_cached_frame()`, line 129, `inspect_cached_frame();` |
+| Reproducing Input File | `sentinel_payload/out/asan_ubsan/crashes/id\:000003\,sig\:06\,src\:000007\,time\:795\,execs\:3840\,op\:havoc\,rep\:1` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAYLOAD_FRAME1337 8 8 11111111111111AA
+```
+
+```bash
+./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAYLOAD_FRAME1337 8 8 11111111111111AA`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | `1337` |
+| `height`       | `8`   |
+| `depth`        | `8`   |
+| `label_buffer` | `11111111111111AA` |
+
+The source code contains a specific frame inspection trigger on line 127: when `width` is equal to 1337, the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively. As the `cleanup_active_frame()` function only frees `global_frame` and `global_frame->data` without setting to `NULL`, it creates two dangling pointers that become use-after-free (UAF) vulnerabilities. The `inspect_cached_frame()` function immediately dereferences both `global_frame` and `global_frame->data`, which triggers the UAF and crashes the program.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+Processing observation frame label: 11111111111111AA
+Payload frame dimensions: 1337 x 8 x 8 (85568 bytes required)
+Read 0 bytes from payload observation stream.
+Transferred 0 bytes into observation buffer.
+Active observation frame released from cache.
+=================================================================
+==1825==ERROR: AddressSanitizer: heap-use-after-free on address 0xf4e00f54 at pc 0x5672cb2e bp 0xff9c8708 sp 0xff9c8700
+READ of size 4 at 0xf4e00f54 thread T0
+    #0 0x5672cb2d in inspect_cached_frame /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:56:71
+    #1 0x5672cb2d in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:129:9
+    #2 0x5672cc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x5672d147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7bfff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #5 0xf7c00097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0x5663f636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+0xf4e00f54 is located 4 bytes inside of 44-byte region [0xf4e00f50,0xf4e00f7c)
+freed by thread T0 here:
+    #0 0x566e1a8e in free (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbea8e) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672c751 in cleanup_active_frame /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:49:9
+    #2 0x5672c751 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:128:9
+    #3 0x5672cc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x5672d147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7bfff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+previously allocated by thread T0 here:
+    #0 0x566e1d11 in malloc (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbed11) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672c059 in process_payload_data /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:67:43
+    #2 0x5672c60e in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:122:5
+    #3 0x5672cc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x5672d147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7bfff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:56:71 in inspect_cached_frame
+Shadow bytes around the buggy address:
+  0xf4e00c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00d80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xf4e00f00: fa fa fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd
+  0xf4e00f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1825==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The heap use-after-free vulnerability can impact the integrity and availability of the system. Successful exploitation can result in unintended modification of the heap and denial of service by crashing. According to CWE, there is a high likelihood of exploitation. An attacker can easily and reliably exploit the heap use-after-free vulnerability by setting `width` to `1337`. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+
+---
+
+#### 4.2.9 `sentinel_payload` Vulnerability 3
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Stack Buffer Overflow |
+| CWE Classification     | CWE-121: Stack-Based Buffer Overflow |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `strcpy()`, line 29, `strcpy(local_label, label);` |
+| Reproducing Input File | `sentinel_payload/out/asan_ubsan/crashes/id\:000001\,sig\:06\,src\:000000\,time\:147\,execs\:670\,op\:havoc\,rep\:4` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAYLOAD_FRAME 8 8         1 RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAA
+```
+
+```bash
+./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAYLOAD_FRAME 8 8         1 RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAA`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | `8`   |
+| `height`       | `8`   |
+| `depth`        | `1`   |
+| `label_buffer` | `RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAA` |
+
+The `label_buffer` array is declared with an array size of 128 bytes, this is double the array size of `local_label` located in the `process_frame_label()` function. The program attempts to store the 66-byte string into the 64-byte buffer defined by `MAX_LABEL_LEN`, which results in a crash.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+=================================================================
+==1767==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf6800050 at pc 0x566be803 bp 0xffd33b08 sp 0xffd336dc
+WRITE of size 67 at 0xf6800050 thread T0
+    #0 0x566be802 in strcpy (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x56723566 in process_frame_label /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:29:5
+    #2 0x56723566 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:103:5
+    #3 0x56723c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x56724147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7b1bf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0xf7b1c097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #7 0x56636636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+Address 0xf6800050 is located in stack of thread T0 at offset 80 in frame
+    #0 0x567233b7 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:88
+
+  This frame has 6 object(s):
+    [16, 80) 'local_label' (line 28)
+    [112, 368) 'header_line' (line 89) <== Memory access at offset 80 partially underflows this variable
+    [432, 560) 'label_buffer' (line 90)
+    [592, 596) 'width' (line 91)
+    [608, 612) 'height' (line 91)
+    [624, 628) 'depth' (line 91)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) in strcpy
+Shadow bytes around the buggy address:
+  0xf67ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xf6800000: f1 f1 00 00 00 00 00 00 00 00[f2]f2 f2 f2 00 00
+  0xf6800080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf6800100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2
+  0xf6800180: f2 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00
+  0xf6800200: 00 00 00 00 00 00 f2 f2 f2 f2 04 f2 04 f2 04 f3
+  0xf6800280: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1767==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The stack buffer overflow vulnerability can impact the confidentiality, integrity, and availability of the system. Successful exploitation enables execution of arbitrary code by reading or writing to the stack as well as denial of service by crashing. According to CWE, CWE-121 Stack-Based Buffer Overflow has a high likelihood of exploitation. Due to the lack of user input validation, an attacker can easily supply a string value for `label_buffer` that exceeds the 64-byte buffer. Based on the NIST guidelines, the overall security impact of this vulnerability is considered high.
+
+---
+
+#### 4.2.10 `sentinel_payload` Vulnerability 4
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Stack Buffer Underflow, Format String Vulnerability |
+| CWE Classification     | CWE-124: Buffer Underwrite ('Buffer Underflow'), CWE-134: Use of Externally-Controlled Format String |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `fprintf()`, line 35, `fprintf(stderr, error_description);` |
+| Reproducing Input File | `sentinel_payload/out/msan/crashes/id\:000001\,sig\:11\,src\:000004\,time\:27\,execs\:135\,op\:havoc\,rep\:7` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n
+```
+
+```bash
+./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | Uninitilised. |
+| `height`       | Uninitilised. |
+| `depth`        | Uninitilised. |
+| `label_buffer` | Uninitilised. |
+
+The `sscanf()` function returns `0`, causing the `if sscanf(header_line, "PAYLOAD_FRAME %u %u %u %127s", &width, &height, &depth, label_buffer) != 4;` condition to evaluate as `true`. As a result, `log_payload_error()` is called with `header_line` as an argument. As `header_line` contains the `%n` format specifier, the function attempts to write the number of preceding characters printed so far to an invalid or unintended memory address. This triggers the format string vulnerability and leads to memory corruption.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+[PAYLOAD ERROR] MemorySanitizer:DEADLYSIGNAL
+==1748==ERROR: MemorySanitizer: SEGV on unknown address 0xffffffffffffffff (pc 0x7ffff7c6fb72 bp 0x7fffffffd7f0 sp 0x7fffffffd2d0 T1748)
+==1748==The signal is caused by a WRITE memory access.
+    #0 0x7ffff7c6fb72 in __printf_buffer stdio-common/vfprintf-process-arg.c:356:21
+    #1 0x7ffff7c709e7 in __vfprintf_internal stdio-common/vfprintf-internal.c:1548:7
+    #2 0x5555555d26b1 in vfprintf (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_msan+0x7e6b1) (BuildId: e7008cc86b4aa2cac4f6f45407f52722a1969360)
+    #3 0x5555555d3831 in fprintf (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_msan+0x7f831) (BuildId: e7008cc86b4aa2cac4f6f45407f52722a1969360)
+    #4 0x5555555883d3 in log_payload_error /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:35:5
+    #5 0x5555556263b8 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c
+    #6 0x5555556264a9 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #7 0x5555556267cc in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #8 0x7ffff7c2a600 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #9 0x7ffff7c2a717 in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555884c4 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_msan+0x344c4) (BuildId: e7008cc86b4aa2cac4f6f45407f52722a1969360)
+
+==1748==Register values:
+rax = 0x0000000000000014  rbx = 0x00007fffffffd830  rcx = 0x0000000000000000  rdx = 0x0000000000000014
+rdi = 0x0000000000000000  rsi = 0x00007ffff7dd4360  rbp = 0x00007fffffffd7f0  rsp = 0x00007fffffffd2d0
+ r8 = 0x0000000000000000   r9 = 0x0000000000000000  r10 = 0x00000000ffffffff  r11 = 0x0000000000000000
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0xffffffffffffffff  r15 = 0x00007fffffffdb95
+MemorySanitizer can not provide additional info.
+SUMMARY: MemorySanitizer: SEGV stdio-common/vfprintf-process-arg.c:356:21 in __printf_buffer
+==1748==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The stack buffer underflow and format string vulnerabilities can impact the confidentiality, integrity, and availability of the system. Successful exploitation of these vulnerabilities enables execution of arbitrary code by reading and writing to the stack as well as denial of service by crashing. According to CWE, CWE-124 Buffer Underwrite ('Buffer Underflow') has a medium likelihood while CWE-134 Use of Externally-Controlled String has a high likelihood. Due to the lack of user input validation, an attacker can easily and reliably exploit both vulnerabilities by supplying a payload with an invalid header line format and which also includes format specifiers, such as `%x` or `%n`, to read and write to the stack. Based on the NIST guidelines, the overall security impact of this vulnerability is considered high.
+
+---
+
 #### 4.2.11 Vulnerability 11
 | Field | Details |
 | :--- | :--- |
