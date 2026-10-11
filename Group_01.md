@@ -979,10 +979,10 @@ The header line, `PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n`, is parsed by the `s
 
 | Variable       | Value |
 | :------------- | :---- |
-| `width`        | Uninitilised. |
-| `height`       | Uninitilised. |
-| `depth`        | Uninitilised. |
-| `label_buffer` | Uninitilised. |
+| `width`        | Uninitialised. |
+| `height`       | Uninitialised. |
+| `depth`        | Uninitialised. |
+| `label_buffer` | Uninitialised. |
 
 The `sscanf()` function returns `0`, causing the `if sscanf(header_line, "PAYLOAD_FRAME %u %u %u %127s", &width, &height, &depth, label_buffer) != 4;` condition to evaluate as `true`. As a result, `log_payload_error()` is called with `header_line` as an argument. As `header_line` contains the `%n` format specifier, the function attempts to write the number of preceding characters printed so far to an invalid or unintended memory address. This triggers the format string vulnerability and leads to memory corruption.
 
