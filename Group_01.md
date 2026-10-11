@@ -6,9 +6,9 @@
 ### Team Members & Workload Distribution
 | Student Name | Student ID | Email Address | Assigned Subtasks / Roles | Contribution (%) |
 | :--- | :--- | :--- | :--- | :--- |
-| `Claire Lin`  | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzz testing of sentinel_telemetry.c` | 33.3% |
-| `Rachel Lim`  | `[n12284181]` | `r20.lim@connect.qut.edu.au`     | `Fuzz testing of sentinel_payload.c`   | 33.3% |
-| `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzz testing of sentinel_network.c`   | 33.3% |
+| `Claire Lin`  | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzzing of sentinel_telemetry.c` | 33.3% |
+| `Rachel Lim`  | `[n12284181]` | `r20.lim@connect.qut.edu.au`     | `Fuzzing of sentinel_payload.c`   | 33.3% |
+| `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzzing of sentinel_network.c`   | 33.3% |
 
 **Submission Files (Canvas):**
 - `Group_01.pdf` (compiled from this completed Markdown report template)
@@ -1387,7 +1387,6 @@ packet4 frees all six chunks from packet1–packet3 (3 × (msg + buffer)) and in
 - tcache(0x10): packet3 msg -> packet3 buffer -> packet2 msg -> packet1 msg
 - tcache(0x30): packet2 buffer
 - tcache(0x40): packet1 buffer
-(Every chunk is binned by its size rounded up to a 16-byte unit.)
 ```bash
 (gdb) continue
 Continuing.
