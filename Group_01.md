@@ -1552,6 +1552,7 @@ if __name__ == "__main__":
 #### sentinel_network
 ```bash
 python3 exploits/exploit.py
+echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
 ./sentinel_network_original exploits/exploit.bin
 ```
 
