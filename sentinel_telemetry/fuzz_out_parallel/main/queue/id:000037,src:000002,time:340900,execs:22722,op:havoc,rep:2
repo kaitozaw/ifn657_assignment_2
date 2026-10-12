@@ -1,0 +1,3 @@
+sensor_idackup=0.95
+log_event=__backup=0.95
+log_event=_request=128

@@ -1,0 +1,6 @@
+==1151100==AddressSanitizer: WARNING: unexpected format specifier in printf interceptor: %
+ (reported once per process)
+=================================================================
+==1151100==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xeea00950 at pc 0x5c16e81e bp 0xffe7ba58 sp 0xffe7b624
+WRITE of size 152 at 0xeea00950 thread T0
+findings/parallel_main/crashes/id:000002,sig:11,src:000129,time:1492912,execs:76564,op:havoc,rep:27

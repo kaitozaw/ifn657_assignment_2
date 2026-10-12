@@ -1,0 +1,117 @@
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+Directive parsed: sens=202
+Directive parsed: cadÅ=d
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): s02
+
+Directive parsed: cal_ba=202p95ˇˇˇ202
+Directive parsed: cal_f®®®®®®®=02
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): c
+
+Directive parsed: auxrequest=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aux_
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): y
+
+Directive parsed: est=-25
+Auxiliary stream memory reserved: 102 bytes.
+Directive parsed: aux_buffer_request=102
+Directive parsed: cal_factor_up=0.95
+[TELEMETRY LOG] CAL_FACTOR_cal_factor_up=0.950000
+Directive parsed: ta=202
+Directive parsed: cal_factor_up=0
+[TELEMETRY LOG] CAL_FACTOR_cal_factor_up=0.000000
+Directive parsed: ====
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): &
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): fe
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sensor_®sor_idb02
+
+Directive parsed: cal_facpor_up=0.95
+Directive parsed: ta=202
+Directive parsed: cal_fsctor_up=0
+Directive parsed: ====
+Directive parsed: =
+Directive parsed: su_t=d
+Stream buffer resized to 3672 bytes.
+Directive parsed: stream_multiplier=4
+Stream buffer resized to 3876 bytes.
+Directive parsed: stream_multiplier=4a5
+Directive parsed: l=d
+Stream buffer resized to 4284 bytes.
+Directive parsed: stream_multiplier=4
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sp
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tream_multiplieu
+
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ˇ
+
+Directive parsed: =
+Directive parsed: =<02
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): c
+
+Auxiliary stream memory reserved: 0 bytes.
+Directive parsed: aux_buffer_request=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aaaaaaaaa%%%%%%%%%%%%%%%-0x1.0c8105f61772p+634aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa2
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): c
+
+Directive parsed: auxrequest=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aux_
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): y
+
+Directive parsed: est=-25
+Auxiliary stream memory reserved: 102 bytes.
+Directive parsed: aux_buffer_request=102
+Directive parsed: cal_factor_up=0.95
+[TELEMETRY LOG] CAL_FACTOR_cal_factor_up=0.950000
+Directive parsed: ta=202
+Directive parsed: cal_factor_up=0
+[TELEMETRY LOG] CAL_FACTOR_cal_factor_up=0.000000
+Directive parsed: ====
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): &
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): fe
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sensor_®sor_idb02
+
+Directive parsed: cal_facpor_up=0.95
+Directive parsed: ta=202
+Directive parsed: cal_fsctor_up=0
+Directive parsed: ====
+Directive parsed: =
+Directive parsed: su_t=d
+Stream buffer resized to 8160 bytes.
+Directive parsed: stream_multiplier=4
+Stream buffer resized to 8364 bytes.
+Directive parsed: stream_multiplier=4a5
+Directive parsed: l=d
+Stream buffer resized to 8772 bytes.
+Directive parsed: stream_multiplier=4
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sp
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tream_multiplieu
+
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ˇ
+
+Directive parsed: =
+Directive parsed: =<02
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): c
+
+Auxiliary stream memory reserved: 0 bytes.
+Directive parsed: aux_buffer_request=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aux_
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): y
+
+Directive parsed: est=-25
+Auxiliary stream memor=================================================================
+==1151072==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xe7807350 at pc 0x5f53481e bp 0xffa6ec98 sp 0xffa6e864
+WRITE of size 156 at 0xe7807350 thread T0
+findings/baseline/crashes/id:000011,sig:11,src:000126,time:1255914,execs:246243,op:havoc,rep:59

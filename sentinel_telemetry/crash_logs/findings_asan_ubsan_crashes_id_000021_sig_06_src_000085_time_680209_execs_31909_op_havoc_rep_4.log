@@ -1,0 +1,131 @@
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+Directive parsed: sens=202
+Directive parsed: cahba=202
+Directive parsed: cr_uv=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cal_=
+Directive parsed: cam_fcia=202
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): fa95
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+Directive parsed: cam_fcid_ba=202
+Directive parsed: =202
+Directive parsed: id_ba=202
+Directive parsed: cžh_factor_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cad_=
+Directive parsed: caa=202
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): caH_
+
+Directive parsed: cahba=202
+Directive parsed: _ba=202
+Directive parsed: cahba=202
+Directive parsed: cr0a=202
+Directive parsed: crusl_ba=202
+Directive parsed: cahba=202
+Directive parsed: c_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+Directive parsed: cam_fcid_ba=202
+Directive parsed: =202
+Directive parsed: id_ba=202
+Directive parsed: cžh_fctor_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cal_=
+Directive parsed: caa=202
+Directive parsed: cah_factor_uv_up=0.95
+Directive parsed: aux_=
+Directive parsed: cambfar_uv_up=
+Directive parsed: aux_=
+Directive parsed: cam_factcrsorcid_ba=202
+Directive parsed: cah_factor_uv_up=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aux2
+
+Directive parsed: cahba=202
+Directive parsed: cr_uv=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+Directive parsed: cam_fcid_ba=202
+Directive parsed: =202
+Directive parsed: id_ba=202
+Directive parsed: cžh_factor_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cal_=
+Directive parsed: caa=202
+Directive parsed: cah_f_uv=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): c
+
+Directive parsed: auxv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cal_=
+Directive parsed: caa=202
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 2
+
+Directive parsed: cr_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ca2
+
+Directive parsed: =202
+Directive parsed: id_ba=202tA
+Directive parsed: cad_=
+Directive parsed: caa=202
+Directive parsed: cah_f_uv=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+Directive parsed: cam_fcid_ba=202
+Directive parsed: =202
+Directive parsed: id_ba=202
+Directive parsed: cžh_fctor_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cal_=
+Directive parsed: caa=202
+Directive parsed: cah_factor_uv_up=
+Directive parsed: aux_=
+Directive parsed: cambfar_uv_up=
+Directive parsed: aux_=
+Directive parsed: cam_factcrsorcid_bh=202
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): v_u
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aux2
+
+Directive parsed: cahba=202
+Directive parsed: cr_uv=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+Directive parsed: cam_fcid_ba=202
+Directive parsed: =202
+Directive parsed: id_ba=202
+Directive parsed: cžh_factor_uv=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tA
+
+Directive parsed: cal_=
+Directive parsed: caa=202
+Directive parsed: cah_f_uv=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): t,
+
+Directive parsed: cal_=
+Directive parsed: cam_fcid_ba=202
+Directive parsed: =22
+Directive parsed: id_ya=202
+Directive parsed: cžh_fctor_uv=
+[TELEMETRY LOG] Invali=================================================================
+==1150985==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xef10cb50 at pc 0x62d8d81e bp 0xffe1f238 sp 0xffe1ee04
+WRITE of size 86 at 0xef10cb50 thread T0
+findings/asan_ubsan/crashes/id:000021,sig:06,src:000085,time:680209,execs:31909,op:havoc,rep:4
