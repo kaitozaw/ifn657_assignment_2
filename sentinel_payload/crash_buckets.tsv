@@ -1,0 +1,12 @@
+no-repro |	out/asan_ubsan/crashes/id:000000,sig:11,src:000004,time:7,execs:66,op:havoc,rep:13
+stack-buffer-overflow | > strcpy (sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) > process_frame_label sentinel_payload.c:29 > parse_payload_file sentinel_payload.c:103	out/asan_ubsan/crashes/id:000001,sig:06,src:000000,time:147,execs:670,op:havoc,rep:4
+no-repro |	out/asan_ubsan/crashes/id:000002,sig:11,src:000007,time:205,execs:977,op:havoc,rep:4
+heap-use-after-free | > inspect_cached_frame sentinel_payload.c:56 > parse_payload_file sentinel_payload.c:129 > old_main sentinel_payload.c:148	out/asan_ubsan/crashes/id:000003,sig:06,src:000007,time:795,execs:3840,op:havoc,rep:1
+no-repro |	out/asan_ubsan/crashes/id:000004,sig:11,src:000006,time:33117,execs:172266,op:havoc,rep:48
+no-repro |	out/msan/crashes/id:000000,sig:11,src:000004,time:3,execs:72,op:havoc,rep:11
+stack-buffer-underflow | > printf_common(void*, char const*, char*) asan_interceptors.cpp.o > fprintf (sentinel_payload_asan_ubsan+0x447b6) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) > log_payload_error sentinel_payload.c:35	out/msan/crashes/id:000001,sig:11,src:000004,time:27,execs:135,op:havoc,rep:7
+heap-use-after-free | > inspect_cached_frame sentinel_payload.c:56 > parse_payload_file sentinel_payload.c:129 > old_main sentinel_payload.c:148	out/msan/crashes/id:000002,sig:06,src:000007,time:7372,execs:11651,op:havoc,rep:1
+no-repro |	out/nosan/crashes/id:000000,sig:11,src:000001,time:20,execs:81,op:havoc,rep:2
+no-repro |	out/nosan/crashes/id:000001,sig:11,src:000001,time:101,execs:1054,op:havoc,rep:4
+heap-use-after-free | > inspect_cached_frame sentinel_payload.c:56 > parse_payload_file sentinel_payload.c:129 > old_main sentinel_payload.c:148	out/nosan/crashes/id:000002,sig:11,src:000006,time:146,execs:1715,op:havoc,rep:1
+heap-buffer-overflow | > fread (sentinel_payload_asan_ubsan+0x3b5bc) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) > parse_payload_file sentinel_payload.c:119 > old_main sentinel_payload.c:148	out/nosan/crashes/id:000003,sig:11,src:000001,time:17339,execs:349023,op:havoc,rep:7

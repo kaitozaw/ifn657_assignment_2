@@ -1,0 +1,24 @@
+[PAYLOAD ERROR] AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1853201==ERROR: AddressSanitizer: SEGV on unknown address 0x00000001 (pc 0xf7bab8b0 bp 0xf6900071 sp 0xffb2b090 T0)
+==1853201==The signal is caused by a WRITE memory access.
+==1853201==Hint: address points to the zero page.
+    #0 0xf7bab8b0  (/usr/lib32/libc.so.6+0x668b0) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #1 0xf7bac2bc  (/usr/lib32/libc.so.6+0x672bc) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #2 0xf7ba80d5 in vfprintf (/usr/lib32/libc.so.6+0x630d5) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #3 0x565a87d7 in fprintf (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x447d7) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #4 0x56580491 in log_payload_error /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:35:5
+    #5 0x5666da0e in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c
+    #6 0x5666dc72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #7 0x5666e147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #8 0xf7b6af5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #9 0xf7b6b097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #10 0x56580636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+==1853201==Register values:
+eax = 0x00000000  ebx = 0x00000001  ecx = 0x00000000  edx = 0x00000000  
+edi = 0xffb2b6ec  esi = 0xffb2b5d0  ebp = 0xf6900071  esp = 0xffb2b090  
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/usr/lib32/libc.so.6+0x668b0) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a) 
+==1853201==ABORTING
+out/asan_ubsan/crashes/id:000000,sig:11,src:000004,time:7,execs:66,op:havoc,rep:13

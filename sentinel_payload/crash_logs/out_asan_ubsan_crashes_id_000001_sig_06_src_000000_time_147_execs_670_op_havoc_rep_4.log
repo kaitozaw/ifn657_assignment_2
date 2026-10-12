@@ -1,0 +1,58 @@
+=================================================================
+==1853209==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf6900050 at pc 0x56672803 bp 0xff9860c8 sp 0xff985c9c
+WRITE of size 67 at 0xf6900050 thread T0
+    #0 0x56672802 in strcpy (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+    #1 0x566d7566 in process_frame_label /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:29:5
+    #2 0x566d7566 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:103:5
+    #3 0x566d7c72 in old_main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:148:18
+    #4 0x566d8147 in main /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:160:15
+    #5 0xf7baef5b  (/usr/lib32/libc.so.6+0x25f5b) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #6 0xf7baf097 in __libc_start_main (/usr/lib32/libc.so.6+0x26097) (BuildId: b2f9ff1a775a2a827a847840bcabf5c682d5109a)
+    #7 0x565ea636 in _start (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0x1c636) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8)
+
+Address 0xf6900050 is located in stack of thread T0 at offset 80 in frame
+    #0 0x566d73b7 in parse_payload_file /home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload.c:88
+
+  This frame has 6 object(s):
+    [16, 80) 'local_label' (line 28)
+    [112, 368) 'header_line' (line 89) <== Memory access at offset 80 partially underflows this variable
+    [432, 560) 'label_buffer' (line 90)
+    [592, 596) 'width' (line 91)
+    [608, 612) 'height' (line 91)
+    [624, 628) 'depth' (line 91)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/rachel/ifn657_assignment_2/sentinel_payload/sentinel_payload_asan_ubsan+0xa4802) (BuildId: ee7803d924b2699b554e434f9a2970d030f342c8) in strcpy
+Shadow bytes around the buggy address:
+  0xf68ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf68ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf68ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf68fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf68fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0xf6900000: f1 f1 00 00 00 00 00 00 00 00[f2]f2 f2 f2 00 00
+  0xf6900080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0xf6900100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2
+  0xf6900180: f2 f2 f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00
+  0xf6900200: 00 00 00 00 00 00 f2 f2 f2 f2 04 f2 04 f2 04 f3
+  0xf6900280: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1853209==ABORTING
+out/asan_ubsan/crashes/id:000001,sig:06,src:000000,time:147,execs:670,op:havoc,rep:4
