@@ -638,8 +638,8 @@ A crafted stream_multiplier can trigger signed integer overflow and crash the te
 
 | Field                  | Details |
 | :--------------------- | :------ |
-| Vulnerability Name     | Heap Buffer Overflow |
-| CWE Classification     | CWE-122: Heap-Based Buffer Overflow |
+| Vulnerability Name     | Integer Overflow, Heap Buffer Overflow |
+| CWE Classification     | CWE-190: Integer Overflow or Wraparound, CWE-122: Heap-Based Buffer Overflow |
 | Target Component       | `sentinel_payload.c` |
 | Vulnerable Location    | `fread()`, line 119, `fread(stream_data, 1, expected_data_size, fp);` |
 | Reproducing Input File | `sentinel_payload/out/nosan/crashes/id\:000003\,sig\:11\,src\:000001\,time\:17339\,execs\:349023\,op\:havoc\,rep\:7` |
@@ -667,9 +667,9 @@ The header line, `PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B`, is parsed b
 | `depth`        | `1111111111111111111` |
 | `label_buffer` | `BBBBB1111` |
 
-The value of `depth` is formatted into a 32-bit unsigned integer with the `%u` format specifier. However, 32-bit unsigned integers can only hold up to 4,294,967,295 values (i.e., 2 ^ (32 - 1)). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, the `%u` format specifier is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
+The value of `depth` is parsed as a 32-bit unsigned integer. However, 32-bit signed integers can only hold up to 4,294,967,295 values (i.e., 2^(32 - 1) values). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, a 32-bit system is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
 
-When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is essentially allocated a memory size of `4294967295 + 1`. This evaluates to `0` and causes the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25 bytes read into a 0-byte memory.
+When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is allocated memory of `4294967295 + 1`. This triggers an integer overflow and evaluates as `0`, causing the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25-bytes read into a `NULL` pointer (i.e., `malloc(0)`).
 
 **GDB / Sanitiser Evidence:**
 
@@ -734,7 +734,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
 
 **Exploitability Assessment:**
 
-The heap buffer overflow vulnerability can impact the availability of the system. Successful exploitation can result in denial of service by crashing. According to CWE, CWE-122 Heap-Based Buffer Overflow has a high likelihood of exploitation. An attacker can easily supply a value exceeding the maximum limit of a 32-bit unsigned integer. The likelihood is further increased by the expanded attack surface, as the system expects and processes three user-supplied unsigned integer values (i.e., `width`, `height`, and `depth`) from the payload's header line, each of which could potentially trigger the heap buffer overflow. The non-zero risk of human error and lack of user input validation is another contributing factor. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+The integer overflow and heap buffer overflow vulnerabilities can impact the availability of the system. Successful exploitation can result in denial of service by crashing. According to CWE, CWE-190: Integer Overflow or Wraparound has a medium likelihood of exploitation while CWE-122: Heap-Based Buffer Overflow has a high likelihood of exploitation. An attacker can easily supply a value exceeding the maximum limit of a 32-bit unsigned integer. The likelihood is further increased by the expanded attack surface, as the system expects and processes three externally-supplied unsigned integer values (i.e., `width`, `height`, and `depth`) from the payload's header line, each of which could potentially trigger the integer overflow and heap buffer overflow. The non-zero risk of human error and lack of input validation is another contributing factor. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
 
 ---
 
