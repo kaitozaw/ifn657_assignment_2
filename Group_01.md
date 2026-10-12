@@ -769,7 +769,7 @@ The header line, `PAYLOAD_FRAME1337 8 8 11111111111111AA`, is parsed by the `ssc
 | `depth`        | `8`   |
 | `label_buffer` | `11111111111111AA` |
 
-The source code contains a specific frame inspection trigger on line 127: when `width` is equal to 1337, the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively. As the `cleanup_active_frame()` function only frees `global_frame` and `global_frame->data` without setting to `NULL`, it creates two dangling pointers that become use-after-free (UAF) vulnerabilities. The `inspect_cached_frame()` function immediately dereferences both `global_frame` and `global_frame->data`, which triggers the UAF and crashes the program.
+The source code contains a specific frame inspection trigger on line 127: when `width` is equal to `1337`, the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively. As the `cleanup_active_frame()` function only frees `global_frame` and `global_frame->data` without reinitialising to `NULL`, it creates two dangling pointers. The `inspect_cached_frame()` function immediately dereferences both `global_frame` and `global_frame->data`, which triggers the use-after-free vulnerability and crashes the program.
 
 **GDB / Sanitiser Evidence:**
 
@@ -846,7 +846,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
 
 **Exploitability Assessment:**
 
-The heap use-after-free vulnerability can impact the integrity and availability of the system. Successful exploitation can result in unintended modification of the heap and denial of service by crashing. According to CWE, there is a high likelihood of exploitation. An attacker can easily and reliably exploit the heap use-after-free vulnerability by setting `width` to `1337`. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+The heap use-after-free vulnerability can impact the integrity and availability of the system. Successful exploitation can result in unintended modification of the heap and denial of service by crashing. According to CWE, CWE-416: Heap Use After Free has a high likelihood of exploitation. An attacker can easily and reliably exploit the vulnerability by setting `width` to `1337`. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
 
 ---
 
