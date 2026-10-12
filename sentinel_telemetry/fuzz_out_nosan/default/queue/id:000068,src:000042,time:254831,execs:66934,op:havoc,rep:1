@@ -1,0 +1,5 @@
+sens=:02
+cal95
+aux_buffer_request=r_95
+aux_buffer_request=25
+aux_buffer_request=128

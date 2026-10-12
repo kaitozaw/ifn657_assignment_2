@@ -6,7 +6,7 @@
 ### Team Members & Workload Distribution
 | Student Name | Student ID | Email Address | Assigned Subtasks / Roles | Contribution (%) |
 | :--- | :--- | :--- | :--- | :--- |
-| `Claire Lin`  | `[n0000001]`  | `c229.lin@connect.qut.edu.au`    | `Fuzzing of sentinel_telemetry.c` | 33.3% |
+| `Claire Lin`  | `[n12379417]`  | `c229.lin@connect.qut.edu.au`    | `Fuzzing of sentinel_telemetry.c` | 33.3% |
 | `Rachel Lim`  | `[n12284181]` | `r20.lim@connect.qut.edu.au`     | `Fuzzing of sentinel_payload.c`   | 33.3% |
 | `Kaito Ozawa` | `[n12224774]` | `kaito.ozawa@connect.qut.edu.au` | `Fuzzing of sentinel_network.c`   | 33.3% |
 
@@ -47,12 +47,12 @@
 sentinel_telemetry
 ```bash
 # Compilation commands with AFL++ instrumentation
-afl-clang-fast -g -o sentinel_telemetry_nosan sentinel_telemetry.c
+afl-clang-fast -m32 -g -O0 -o sentinel_telemetry_nosan sentinel_telemetry.c
 
 # Compilation commands with AddressSanitizer and UndefinedBehaviorSanitizer
 export AFL_USE_ASAN=1
 export AFL_USE_UBSAN=1
-afl-clang-fast -g -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
+afl-clang-fast -m32 -g -O0 -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 ```
 
 sentinel_payload
@@ -166,6 +166,7 @@ Baseline fuzzing:
 ```bash
 afl-fuzz -i seeds -o fuzz_out_nosan ./sentinel_telemetry_nosan @@
 ```
+
 Dictionary: `dict`
 ```bash
 log_event="log_event="
@@ -176,9 +177,16 @@ cal_factor="cal_factor_"
 delimiter="="
 ```
 
-Dictionary-assisted fuzzing:
+Dictionary-assisted parallel fuzzing:
+
+Main fuzzer:
 ```bash
-afl-fuzz -i seeds -o fuzz_out_dict -x dict ./sentinel_telemetry_nosan @@
+afl-fuzz -i seeds -o fuzz_out_parallel -M main -x dict ./sentinel_telemetry_nosan @@
+```
+
+Secondary fuzzer:
+```bash
+afl-fuzz -i seeds -o fuzz_out_parallel -S secondary -x dict ./sentinel_telemetry_nosan @@
 ```
 
 Sanitizer-guided fuzzing:
@@ -186,7 +194,7 @@ Sanitizer-guided fuzzing:
 afl-fuzz -i seeds -o fuzz_out_asan_ubsan -m none ./sentinel_telemetry_asan_ubsan @@
 ```
 **Technical Justification:**
-The baseline campaign was used to check the initial fuzzing results. The dictionary included telemetry directives and `key=value` syntax to help AFL++ generate inputs that match the expected format. The dictionary campaign reached the same edge coverage as the baseline and found a slightly larger corpus. ASan and UBSan were also used to detect memory and undefined behaviour issues during fuzzing.
+The baseline campaign was used to check initial coverage and crashes. The dictionary included telemetry directives and `key=value` syntax to help AFL++ generate inputs in the expected format. Parallel fuzzing was then performed using two AFL++ instances with the same dictionary, and both instances shared corpus inputs. Both reached the same bitmap coverage as the baseline, with slightly larger corpora. ASan and UBSan were also used to detect memory errors and undefined behaviour during fuzzing.
 
 #### sentinel_payload
 
@@ -315,8 +323,8 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
-
-![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_afl_status_screen_dict.jpg)
+![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_03_dict.jpg)
+![sentinel_telemetry AFL++ Summary Stats](images/sentinel_telemetry/sentinel_telemetry_03_dict_summary.jpg)
 
 sentinel_payload
 
@@ -401,18 +409,6 @@ If no valid minimised `.bin` file is produced, use the original representative c
 ./sentinel_{target}_asan_ubsan {original_representative_crash}
 ```
 
-If the result is unclear, check the crash manually with GDB:
-```bash
-gdb ./sentinel_{target}_asan_ubsan
-```
-
-Then run:
-```gdb
-run {original_representative_crash}
-```
-
-Check the sanitizer/GDB output against the source code.
-
 #### 5. decode the input as a packet sequence (`network` only)
 ```bash
 xxd crash_analysis/{name}.bin
@@ -425,84 +421,204 @@ xxd crash_analysis/{name}.bin
 #### 4.2.1 Vulnerability 1
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `[e.g. Format String Vulnerability in Telemetry Logger]` |
-| **CWE Classification** | `[e.g. CWE-134: Use of Externally-Controlled Format String]` |
-| **Target Component** | `[e.g. sentinel_telemetry.c]` |
-| **Vulnerable Location** | `[Function name, line number, and code snippet]` |
-| **Reproducing Input File** | `[e.g. crashes/id_000000_telemetry_crash.conf]` |
+| **Vulnerability Name** | `Stack Buffer Overflow in Telemetry Directive Status Formatting` |
+| **CWE Classification** | `CWE-121: Stack-based Buffer Overflow` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `process_telemetry_directive()` L100: `sprintf(status_output, "Directive parsed: %s=%s", formatted_key, formatted_value);` |
+| **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2` |
 
 **Triggering Input & Reproduction Command:**
-```bash
-# Provide command to reproduce the crash
+The representative AFL++ input contains three telemetry directives:
+```text
+sensor_id_ba=202
+cal_factor_up=0.95
+aux_bu44444444444444444444444444ff?r_request=128
+```
 
+The first two directives are processed successfully. The third directive triggers the stack buffer overflow.
+
+The parser splits the third line at the first `=`:
+```text
+key   = aux_bu44444444444444444444444444ff?r_request
+value = 128
+```
+
+Both strings are passed to `process_telemetry_directive()` and later combined into `status_output[64]` using `sprintf()` without checking the output length.
+
+Reproduce using the ASan/UBSan-instrumented binary:
+```bash
+./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2"
 ```
 
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+`process_telemetry_directive()` copies the parsed key and value into bounded `formatted_key[64]` and `formatted_value[128]` buffers. It then combines both strings with additional text into the smaller `status_output[64]` buffer using `sprintf()` without checking the resulting length.
+
+For crash `000000`, the first two telemetry directives are processed successfully. The third directive contains a long key, which causes the formatted output to exceed the 64-byte buffer. AddressSanitizer reports a 67-byte write to `status_output`, which occupies stack offsets `[272, 336)`. The invalid access begins at offset 336, immediately beyond the buffer. This confirms the stack buffer overflow at line 100.
 
 **GDB / Sanitiser Evidence:**
 ```text
-[Paste annotated Sanitiser error report or GDB backtrace here]
+ERROR: AddressSanitizer: stack-buffer-overflow
+WRITE of size 67
+
+#0 ... in vsprintf
+#1 ... in sprintf
+#2 ... in process_telemetry_directive
+   sentinel_telemetry.c:100:5
+#3 ... in parse_telemetry_line
+   sentinel_telemetry.c:161
+#4 ... in parse_telemetry_stream
+   sentinel_telemetry.c:173
+#5 ... in main
+   sentinel_telemetry.c:200
+
+This frame has 3 object(s):
+  [16, 80)   'formatted_key'
+  [112, 240) 'formatted_value'
+  [272, 336) 'status_output'
+               <--- Memory access at offset 336 overflows this variable
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact (e.g. memory leak, DoS, arbitrary write)]`
+A crafted telemetry directive can write beyond the 64-byte `status_output` stack buffer. ASan terminates the observed execution, demonstrating a denial-of-service impact. As the overflowing content originates from telemetry input, adjacent stack memory can also be corrupted. Control-flow hijacking or arbitrary code execution was not demonstrated.
 
 ---
 
 #### 4.2.2 Vulnerability 2
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `[e.g. Integer Overflow in Stream Buffer Calculation]` |
-| **CWE Classification** | `[e.g. CWE-190: Integer Overflow or Wraparound]` |
-| **Target Component** | `[e.g. sentinel_telemetry.c]` |
-| **Vulnerable Location** | `[Function name, line number, and code snippet]` |
-| **Reproducing Input File** | `[e.g. crashes/id_000001_stream_overflow.conf]` |
+| **Vulnerability Name** | `Excessive Memory Allocation from Auxiliary Buffer Request` |
+| **CWE Classification** | `CWE-789: Memory Allocation with Excessive Size Value` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `process_telemetry_directive()` L93–94 and `allocate_auxiliary_buffer()` L55 |
+| **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1` |
 
 **Triggering Input & Reproduction Command:**
-```bash
-# Provide command to reproduce the crash
-
+The representative AFL++ input contains three telemetry directives:
+```text
+sens=202
+r_up=0.95
+aux_buffer_request=-2.\_buaux_buffer_request=-28
 ```
 
+The first two directives are processed before the third directive triggers the excessive memory allocation request.
+
+The parser splits the third line at the first `=`:
+```text
+key   = aux_buffer_request
+value = -2.\_buaux_buffer_request=-28
+```
+
+The value is passed to the `aux_buffer_request` branch in `process_telemetry_directive()`. Since `atoi()` stops converting at the first non-numeric character, the value is interpreted as `-2`. When cast to a 32-bit `size_t`, it becomes `0xfffffffe`, resulting in an excessive allocation request.
+
+Reproduce using the ASan/UBSan-instrumented binary:
+```bash
+./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1"
+```
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+The `aux_buffer_request` value is converted with `atoi()` and cast directly to `size_t` without checking whether the requested size is within an acceptable range:
+
+```c
+size_t req_size = (size_t)atoi(formatted_value);
+char *aux = allocate_auxiliary_buffer(req_size);
+```
+
+For crash `000018`, the input value begins with `-2`, which `atoi()` converts to the integer `-2`. Casting this negative value to a 32-bit unsigned `size_t` produces `0xfffffffe` (4,294,967,294 bytes).
+
+The resulting size is passed directly to `malloc()` in `allocate_auxiliary_buffer()`. AddressSanitizer reports that the requested allocation exceeds the maximum supported size of `0xc0000000`. The missing input validation therefore allows a negative telemetry value to become an excessively large memory allocation request.
 
 **GDB / Sanitiser Evidence:**
 ```text
-[Paste annotated Sanitiser error report or GDB backtrace here]
+ERROR: AddressSanitizer: requested allocation size
+0xfffffffe ... exceeds maximum supported size of 0xc0000000
+
+#0 ... in malloc
+#1 ... in allocate_auxiliary_buffer
+   sentinel_telemetry.c:55:28
+#2 ... in process_telemetry_directive
+   sentinel_telemetry.c:94:21
+#3 ... in parse_telemetry_line
+   sentinel_telemetry.c:161
+#4 ... in parse_telemetry_stream
+   sentinel_telemetry.c:173
+#5 ... in main
+   sentinel_telemetry.c:200
+
+SUMMARY: AddressSanitizer: allocation-size-too-big ... in malloc
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+A crafted `aux_buffer_request` can cause an excessive memory allocation request. In the observed sanitizer execution, the allocation is rejected and the process aborts, resulting in denial of service. No memory corruption or arbitrary code execution was demonstrated.
 
 ---
 
-#### 4.2.3 Vulnerability X (numbered sequentially for each distinct vulnerability)
+#### 4.2.3 Vulnerability 3
 | Field | Details |
 | :--- | :--- |
-| **Vulnerability Name** | `[e.g. Stack Buffer Overflow in Frame Label Processing]` |
-| **CWE Classification** | `[e.g. CWE-121: Stack-based Buffer Overflow]` |
-| **Target Component** | `[e.g. sentinel_payload.c]` |
-| **Vulnerable Location** | `[Function name, line number, and code snippet]` |
-| **Reproducing Input File** | `[e.g. crashes/id_000002_payload_label_overflow.bin]` |
+| **Vulnerability Name** | `Format String Vulnerability in Telemetry Event Logging` |
+| **CWE Classification** | `CWE-134: Use of Externally-Controlled Format String` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `log_telemetry_event()` L43: `printf(event_message);` |
+| **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16` |
 
 **Triggering Input & Reproduction Command:**
-```bash
-# Provide command to reproduce the crash
-
+The representative AFL++ input contains two telemetry lines:
+```text
+s%nnsor_a_ba\<nnsor_a_ba<20st2
+cal_faq???????????quest=128
 ```
 
+The first line does not contain an `=` delimiter and includes the `%n` format specifier. As a result, `parse_telemetry_line()` treats it as invalid syntax and constructs an error message containing the original input.
+
+The error message is passed to `log_telemetry_event()`, where `printf(event_message)` interprets `%n` as a format specifier instead of ordinary text.
+
+Reproduce using the ASan/UBSan-instrumented binary:
+
+```bash
+./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16"
+```
 **Root Cause Analysis:**
-`[Explain the technical root cause, memory state, and why the input leads to corruption]`
+When a telemetry line does not contain an `=` delimiter, `parse_telemetry_line()` constructs an error message containing the invalid input and passes it to `log_telemetry_event()`:
+```c
+sprintf(err_msg, "Invalid telemetry line syntax (missing '=' delimiter): %s", line);
+log_telemetry_event(err_msg);
+```
+
+However, `log_telemetry_event()` passes the message directly to `printf()` without a fixed format string:
+```c
+printf("[TELEMETRY LOG] ");
+printf(event_message);
+printf("\n");
+```
+
+For crash `000015`, the first telemetry line contains `%n`. Since `printf()` interprets this as a format specifier, it attempts to write through a pointer argument that was never supplied. This results in an invalid memory write and a segmentation fault.
+
+The root cause is the use of externally controlled input as a format string, classified as CWE-134.
 
 **GDB / Sanitiser Evidence:**
 ```text
-[Paste annotated Sanitiser error report or GDB backtrace here]
+AddressSanitizer:DEADLYSIGNAL
+
+ERROR: AddressSanitizer: SEGV on unknown address
+The signal is caused by a WRITE memory access.
+
+#0 ... in libc.so.6
+#1 ... in libc.so.6
+#2 ... in vprintf
+#3 ... in printf
+#4 ... in log_telemetry_event
+   sentinel_telemetry.c:43:5
+#5 ... in parse_telemetry_line
+   sentinel_telemetry.c:137:9
+#6 ... in parse_telemetry_stream
+   sentinel_telemetry.c:173
+#7 ... in main
+   sentinel_telemetry.c:200
+
+SUMMARY: AddressSanitizer: SEGV ... in libc.so.6
 ```
 
 **Exploitability Assessment:**
-`[Assess the severity and realistic attacker impact]`
+A crafted telemetry line containing format specifiers such as `%n` can cause an invalid memory write during error logging. In the observed sanitizer execution, this results in a segmentation fault and denial of service. Format string vulnerabilities may also allow unintended memory access, but information disclosure or arbitrary code execution was not demonstrated in this test.
 
 ---
 

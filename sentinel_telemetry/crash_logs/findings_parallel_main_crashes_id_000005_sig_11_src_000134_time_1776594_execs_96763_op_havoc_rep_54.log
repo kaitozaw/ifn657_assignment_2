@@ -1,0 +1,214 @@
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): auxZ
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): Ú
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): Z
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+Directive parsed: =
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): cal_factor_
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 5
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): a
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 5
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -a•u
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ÿcal_factor_
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -a•22
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): stz-0x1.10810655f772p+741
+
+Directive parsed: =ues
+Directive parsed: =
+[TELEMETRY LOG] 
+Directive parsed: log_event=
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 	
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): €
+
+Directive parsed: =Wb
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): .
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): Õ
+
+Directive parsed: ux_bstream_multiplie=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 	þ
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+Directive parsed: id_prima‘y=101
+Directive parsed: cal_fpcwor_cal_factor_thermal=1.0
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): log_
+
+Directive parsed: s=1sor_id_backbackup=0.95
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): aux_buffer_rq
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): … 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 	•u
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 	 â
+
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): <
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 02
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sensˆ
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): <
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 02
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): s„‰sor_id__
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): .
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): <
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 02
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sensˆ
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): <
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 02
+
+Directive parsed: sensor_id__backup=event=ïè
+Sensor calibration reading failed; using default channel.
+[TELEMETRY LOG] CAL_ID_sensor_id__backup=0
+Auxiliary stream memory reserved: 0 bytes.
+Directive parsed: aux_buffer_request=.
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): xiph
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): .
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): -
+
+Directive parsed: -aÿÿ=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): a
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): a•u
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ÿ
+
+Directive parsed: s=1sor_id_Eac}backu
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): <
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 02
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sensˆ
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): <
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 0p22
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 22
+Directive parsed: =
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ›››››š›››››››››››
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): tion Profile
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 202
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): cal|aaaaaìÿ×l
+
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ÿ_u€
+
+Directive parsed: =_b
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): â
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ïè5
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): sens
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+Directive parsed: ent=ÿÿÿÿystem_initialis
+Directive parsed: =ues
+Directive parsed: =
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 	
+
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ÿ_u€
+
+Directive parsed: =_b
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): â
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): evÿÿ€
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+Directive parsed: recal_factor_er=uffer^req
+Directive parsed: ensor_id_backup=202
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): cal_
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): f
+
+Directive parsed: lo=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): rvryCodfi'uration Profile
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 202
+
+Directive parsed: cal|aaaaaìÿ×lo=
+Stream buffer resized to 6600 bytes.
+Directive parsed: stream_multiplier=a
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): log_eventtor_8
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): rvry Codfi'uration Qrofile
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 202
+
+Directive parsed: cal|aaaaaìÿ×lo=
+Stream buffer resized to 7000 bytes.
+Directive parsed: stream_multiplier=a
+Directive parsed: lo=
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ö	
+
+Directive parsed: =
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): ÿ_ufenstream_multiplÿÿ€
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): cal_oPcWor__faa
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 5
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 
+
+Directive parsed: ö	¤¤¤¤¤¤¤p=0.95
+Directive parsed: =
+Stream buffer resized to 8000 bytes.
+Directive parsed: stream_multiplier==
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): û_u 
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): o
+
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): 5
+
+Directive pa=================================================================
+==1151122==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xee305550 at pc 0x6551481e bp 0xffdee838 sp 0xffdee404
+WRITE of size 65 at 0xee305550 thread T0
+findings/parallel_main/crashes/id:000005,sig:11,src:000134,time:1776594,execs:96763,op:havoc,rep:54

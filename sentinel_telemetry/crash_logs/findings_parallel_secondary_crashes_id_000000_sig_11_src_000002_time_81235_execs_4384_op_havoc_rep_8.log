@@ -1,0 +1,5 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1151150==ERROR: AddressSanitizer: SEGV on unknown address 0x5a4ff720 (pc 0xf31de8b0 bp 0xf1f00049 sp 0xfff53bf0 T0)
+==1151150==The signal is caused by a WRITE memory access.
+findings/parallel_secondary/crashes/id:000000,sig:11,src:000002,time:81235,execs:4384,op:havoc,rep:8

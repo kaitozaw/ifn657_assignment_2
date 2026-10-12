@@ -1,0 +1,7 @@
+sensor_id_ba=202
+cal_factor_up=0.95
+ba=202
+cal_factor_up=0.95
+x_st=128
+p=0.95
+aux_buffer_request=128

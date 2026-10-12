@@ -1,0 +1,6 @@
+# environment variables:
+AFL_CUSTOM_INFO_PROGRAM=./sentinel_telemetry_nosan
+AFL_CUSTOM_INFO_PROGRAM_ARGV=@@
+AFL_CUSTOM_INFO_OUT=fuzz_out_parallel/secondary
+# command line:
+'afl-fuzz' '-i' 'seeds' '-o' 'fuzz_out_parallel' '-S' 'secondary' '-x' 'dict' './sentinel_telemetry_nosan' '@@'

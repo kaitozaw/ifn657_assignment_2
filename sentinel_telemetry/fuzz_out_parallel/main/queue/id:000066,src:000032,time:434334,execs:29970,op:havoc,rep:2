@@ -1,0 +1,6 @@
+sensor_id_02
+cal_factor_backup=p=0.95
+aux_backup=2=2
+cal_factor_sackuid_backup=]02
+cal_factor_backup=p=0.95
+aux_buffer_request=128

@@ -1,24 +1,50 @@
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000000,sig:06,src:000000,time:6806,execs:477,op:havoc,rep:3
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000001,sig:06,src:000000,time:9229,execs:647,op:havoc,rep:6
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000002,sig:06,src:000000,time:9304,execs:651,op:havoc,rep:5
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000003,sig:06,src:000000,time:10293,execs:717,op:havoc,rep:7
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000004,sig:06,src:000000,time:12551,execs:864,op:havoc,rep:8
-stack-buffer-overflow |	fuzz_out_asan_ubsan/default/crashes/id:000005,sig:06,src:000000,time:13185,execs:909,op:havoc,rep:6
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000006,sig:06,src:000000,time:16128,execs:1118,op:havoc,rep:5
-requested | > malloc (sentinel_telemetry_asan_ubsan+0xd3a28) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > allocate_auxiliary_buffer sentinel_telemetry.c:55 > process_telemetry_directive sentinel_telemetry.c:94	fuzz_out_asan_ubsan/default/crashes/id:000007,sig:06,src:000000,time:25325,execs:1742,op:havoc,rep:2
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000008,sig:06,src:000000,time:58158,execs:3928,op:havoc,rep:8
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000009,sig:06,src:000000,time:140453,execs:8973,op:havoc,rep:7
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000010,sig:06,src:000038,time:178844,execs:11405,op:havoc,rep:6
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000011,sig:06,src:000038,time:180217,execs:11499,op:havoc,rep:6
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000012,sig:06,src:000038,time:194460,execs:12387,op:havoc,rep:5
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000013,sig:06,src:000038,time:210893,execs:13497,op:havoc,rep:7
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000014,sig:06,src:000038,time:213517,execs:13680,op:havoc,rep:6
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000015,sig:06,src:000027,time:242557,execs:15657,op:havoc,rep:15
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000016,sig:06,src:000021,time:246266,execs:15921,op:havoc,rep:3
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000017,sig:06,src:000057,time:311679,execs:20426,op:havoc,rep:1
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000018,sig:06,src:000064,time:323253,execs:21213,op:havoc,rep:9
-no-repro |	fuzz_out_asan_ubsan/default/crashes/id:000019,sig:04,src:000039,time:462491,execs:30699,op:havoc,rep:16
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000020,sig:06,src:000065,time:602192,execs:40202,op:havoc,rep:15
-stack-buffer-overflow | > vsprintf (sentinel_telemetry_asan_ubsan+0x57c4e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > sprintf (sentinel_telemetry_asan_ubsan+0x58e0e) (BuildId: 462474cdee1fe5275def3aad7d467b26fdbb53f9) > process_telemetry_directive sentinel_telemetry.c:100	fuzz_out_asan_ubsan/default/crashes/id:000021,sig:06,src:000081,time:664833,execs:43986,op:havoc,rep:13
-stack-buffer-overflow |	fuzz_out_asan_ubsan/default/crashes/id:000022,sig:06,src:000081,time:691015,execs:45436,op:havoc,rep:8
-no-repro |	fuzz_out_asan_ubsan/default/crashes/id:000023,sig:06,src:000033,time:2301029,execs:107681,op:havoc,rep:20
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000001,sig:06,src:000002,time:30406,execs:971,op:havoc,rep:1
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000002,sig:06,src:000002,time:61770,execs:1887,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000003,sig:06,src:000002,time:65466,execs:2008,op:havoc,rep:1
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000004,sig:06,src:000002,time:78544,execs:2440,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000005,sig:06,src:000002,time:120098,execs:3763,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000006,sig:06,src:000002,time:124315,execs:3902,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000007,sig:06,src:000002,time:166001,execs:5279,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000008,sig:06,src:000002,time:219857,execs:7026,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000009,sig:06,src:000002,time:292317,execs:10091,op:havoc,rep:2
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000010,sig:06,src:000027,time:315650,execs:11302,op:havoc,rep:15
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000011,sig:06,src:000027,time:322268,execs:11688,op:havoc,rep:9
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000012,sig:06,src:000027,time:326201,execs:11918,op:havoc,rep:14
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000013,sig:06,src:000027,time:331700,execs:12235,op:havoc,rep:15
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000014,sig:06,src:000027,time:357211,execs:13655,op:havoc,rep:14
+no-repro |	findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000016,sig:06,src:000003,time:365336,execs:14118,op:havoc,rep:12
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000017,sig:06,src:000058,time:442372,execs:18564,op:havoc,rep:2
+requested |	findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1
+no-repro |	findings/asan_ubsan/crashes/id:000019,sig:04,src:000003,time:589353,execs:27086,op:havoc,rep:1
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000020,sig:06,src:000041,time:600798,execs:27749,op:havoc,rep:10
+stack-buffer-overflow |	findings/asan_ubsan/crashes/id:000021,sig:06,src:000085,time:680209,execs:31909,op:havoc,rep:4
+no-repro |	findings/baseline/crashes/id:000000,sig:11,src:000046,time:221514,execs:57700,op:havoc,rep:3
+no-repro |	findings/baseline/crashes/id:000001,sig:11,src:000003,time:264198,execs:69390,op:havoc,rep:8
+no-repro |	findings/baseline/crashes/id:000002,sig:11,src:000003,time:264339,execs:69431,op:havoc,rep:5
+no-repro |	findings/baseline/crashes/id:000003,sig:11,src:000083,time:571251,execs:155740,op:havoc,rep:22
+stack-buffer-overflow |	findings/baseline/crashes/id:000004,sig:11,src:000083,time:615572,execs:167091,op:havoc,rep:22
+requested |	findings/baseline/crashes/id:000005,sig:11,src:000083,time:616013,execs:167196,op:havoc,rep:24
+stack-buffer-overflow |	findings/baseline/crashes/id:000006,sig:11,src:000083,time:636455,execs:172011,op:havoc,rep:42
+no-repro |	findings/baseline/crashes/id:000007,sig:11,src:000083,time:640352,execs:172825,op:havoc,rep:64
+requested |	findings/baseline/crashes/id:000008,sig:11,src:000110,time:846618,execs:209491,op:havoc,rep:4
+requested |	findings/baseline/crashes/id:000009,sig:11,src:000111,time:932970,execs:221356,op:havoc,rep:40
+requested |	findings/baseline/crashes/id:000010,sig:11,src:000111,time:934493,execs:221514,op:havoc,rep:22
+stack-buffer-overflow |	findings/baseline/crashes/id:000011,sig:11,src:000126,time:1255914,execs:246243,op:havoc,rep:59
+no-repro |	findings/baseline/crashes/id:000012,sig:11,src:000113,time:1618812,execs:280356,op:havoc,rep:2
+no-repro |	findings/parallel_main/crashes/id:000000,sig:11,src:000055,time:396978,execs:27886,op:havoc,rep:4
+no-repro |	findings/parallel_main/crashes/id:000001,sig:11,src:000069,time:538633,execs:37204,op:havoc,rep:32
+stack-buffer-overflow |	findings/parallel_main/crashes/id:000002,sig:11,src:000129,time:1492912,execs:76564,op:havoc,rep:27
+no-repro |	findings/parallel_main/crashes/id:000003,sig:11,src:000068,time:1564644,execs:82946,op:havoc,rep:3
+no-repro |	findings/parallel_main/crashes/id:000004,sig:11,src:000070,time:1717692,execs:94466,op:havoc,rep:25
+stack-buffer-overflow |	findings/parallel_main/crashes/id:000005,sig:11,src:000134,time:1776594,execs:96763,op:havoc,rep:54
+no-repro |	findings/parallel_main/crashes/id:000006,sig:11,src:000014,time:1845783,execs:103510,op:havoc,rep:50
+stack-buffer-overflow |	findings/parallel_main/crashes/id:000007,sig:11,src:000138,time:2544238,execs:144938,op:havoc,rep:7
+stack-buffer-overflow |	findings/parallel_main/crashes/id:000008,sig:11,src:000138,time:2603476,execs:148975,op:havoc,rep:25
+no-repro |	findings/parallel_secondary/crashes/id:000000,sig:11,src:000002,time:81235,execs:4384,op:havoc,rep:8
+no-repro |	findings/parallel_secondary/crashes/id:000001,sig:11,src:000020,time:1868672,execs:117141,op:havoc,rep:6
+stack-buffer-overflow |	findings/parallel_secondary/crashes/id:000002,sig:11,src:000139,time:2978163,execs:173412,op:havoc,rep:10
+no-repro |	findings/parallel_secondary/crashes/id:000003,sig:11,src:000007,time:3305014,execs:203593,op:havoc,rep:13
+no-repro |	findings/parallel_secondary/crashes/id:000004,sig:11,src:000067,time:3536305,execs:225720,op:havoc,rep:10
+no-repro |	findings/parallel_secondary/crashes/id:000005,sig:11,src:000090,time:3679305,execs:235676,op:havoc,rep:5
