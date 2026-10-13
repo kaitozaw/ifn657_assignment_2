@@ -316,7 +316,7 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 
 | Target Program | Campaign Duration | Total Executions | Execution Speed (exec/s) | Total Paths Discovered | Unique Crashes Reported |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| `sentinel_telemetry` | 1.16 hours | 758K | 23.67/sec | 166 paths | 24 crashes |
+| `sentinel_telemetry` | 1 hours | 165K | 36.94/sec | 132 paths | 22 crashes |
 | `sentinel_payload` | 3.0 hours | 67M | 18,582/sec | 24 paths | 12 crashes | 
 | `sentinel_network` | 2.4 hours | 22M | 2,630/sec | 72 paths | 103 crashes |
 
@@ -595,7 +595,7 @@ A crafted telemetry line containing format specifiers such as `%n` can cause an 
 | **CWE Classification** | `CWE-190: Integer Overflow or Wraparound` |
 | **Target Component** | `sentinel_telemetry.c` |
 | **Vulnerable Location** | `calculate_stream_buffer_size()` L55: `size_t stream_bandwidth = num_channels * sample_rate;` |
-| **Reproducing Input File** | `fuzz_out_remediated_persistent_asan_ubsan/default/crashes/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4` |
+| **Reproducing Input File** | `findings/persistent_refuzzing/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4` |
 
 **Triggering Input & Reproduction Command:**
 ```bash
@@ -1257,7 +1257,7 @@ The impact is limited to denial of service. This is undefined behavior (a misali
 
 The original `sprintf()` did not check the output length, allowing the formatted message to overflow the 64-byte `status_output` buffer and overwrite adjacent stack memory.
 
-Replacing it with `snprintf()` limits the output to the buffer size, including the null terminator. Longer messages are truncated, preventing the stack buffer overflow while preserving normal processing of valid directives.
+`snprintf()` limits the output to the size of status_output. If the message is too long, it is truncated instead of overflowing the buffer.
 
 #### Patch for Vulnerability 2 (`sentinel_telemetry.c`):
 ```c
@@ -1338,7 +1338,7 @@ if (stream_bandwidth > SIZE_MAX - channel_overhead) {
 
 The original code multiplied two signed integers without checking their values, which could cause integer overflow before the result was assigned to `size_t`.
 
-The patch rejects invalid values and converts num_channels to `size_t` before multiplication. It also checks for overflow before adding the buffer sizes, while allowing valid stream calculations to continue.
+The patch checks the input values before multiplication and uses `size_t` for the calculation. It also checks whether the result would exceed `SIZE_MAX`.
 
 #### Patch for Vulnerability X (`sentinel_payload.c`):
 ```c
@@ -1400,9 +1400,51 @@ typedef struct __attribute__((packed)) {
 
 sentinel_telemetry
 ```bash
-# Demonstrate executing the patched binaries against all triggering crash inputs
+# Vulnerability 1
+# ./sentinel_telemetry_remediated_asan_ubsan findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+Directive parsed: sensor_id_ba=202
+[TELEMETRY LOG] CAL_ID_sensor_id_ba=202
+Directive parsed: cal_factor_up=0.95
+[TELEMETRY LOG] CAL_FACTOR_cal_factor_up=0.950000
+Directive parsed: aux_bu44444444444444444444444444ff?r_request=
+Telemetry parsing complete. Processed entries: 3
+Exit code: 0
 
+# Vulnerability 2
+# ./sentinel_telemetry_remediated_asan_ubsan findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+Directive parsed: sens=202
+Directive parsed: r_up=0.95
+Invalid auxiliary buffer size.
+Directive parsed: aux_buffer_request=-2._buaux_buffer_request=-
+Telemetry parsing complete. Processed entries: 3
+Exit code: 0
+
+# Vulnerability 3
+# ./sentinel_telemetry_remediated_asan_ubsan findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+[TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): s%nnsor_a_ba<nnsor_a_ba<20st2
+Directive parsed: cal_faq???????????quest=128
+Telemetry parsing complete. Processed entries: 1
+Exit code: 0
+
+# Vulnerability 4
+# ./sentinel_telemetry_remediated_asan_ubsan findings/persistent_refuzzing/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4
+=== Sentinel-1 Orbital Telemetry Processor ===
+Initialising telemetry stream parser...
+Directive parsed: subode=nal
+Directive parsed: tre=or_id_pry=101cal_factor_the=1.05
+[TELEMETRY LOG] d
+Directive parsed: log_event=d
+Directive parsed: stream_multiplier=4444444444444444444444
+Telemetry parsing complete. Processed entries: 5
+Exit code: 0
 ```
+
 sentinel_payload
 ```bash
 # Demonstrate executing the patched binaries against all triggering crash inputs
@@ -1504,11 +1546,9 @@ Station status telecommand processed successfully.
 
 sentinel_telemetry
 ```bash
-
+afl-fuzz -i seeds -o fuzz_out_remediated_asan_ubsan_run2 -m none -- ./sentinel_telemetry_remediated_asan_ubsan @@
 ```
-```
-[Insert Screenshot: sentinel_telemetry AFL++ Status Screen]
-```
+![sentinel_network AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_04_remediated.jpg)
 
 sentinel_payload
 ```bash

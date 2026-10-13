@@ -1,0 +1,7 @@
+# Se
+subent=d
+stream_multiplier=4=oal
+se1H1
+cal_factor_the=1.05
+log_event=d
+stream_multiplier=4

@@ -1,0 +1,4 @@
+sdnsd_p=0.95
+axxrba=.02
+p=0.95
+aux_buffer_request=128
