@@ -1,0 +1,6 @@
+sensor_id_ba=202
+cal_factor_up=0.95
+a=act2
+cal_factor_up=2
+cal_factor_ba=202
+cal_factor_st=-28

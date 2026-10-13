@@ -32,7 +32,7 @@ typedef struct {
 } station_telemetry_t;
 
 static station_telemetry_t *global_telemetry = NULL;
-
+// Vulnerability 3_Format String Vulnerability in Telemetry Event Logging
 void log_telemetry_event(const char *event_message) {
     FILE *logfile = fopen("/tmp/sentinel_telemetry.log", "a");
     if (logfile) {
@@ -40,19 +40,19 @@ void log_telemetry_event(const char *event_message) {
         fclose(logfile);
     }
     printf("[TELEMETRY LOG] ");
-    printf(event_message);
+    printf(event_message); // Vulnerable Location
     printf("\n");
 }
-
+// Vulnerability 4 - CWE-190: Integer Overflow or Wraparound
 size_t calculate_stream_buffer_size(int num_channels, int sample_rate) {
     size_t channel_overhead = num_channels * sizeof(telemetry_entry_t);
-    size_t stream_bandwidth = num_channels * sample_rate;
+    size_t stream_bandwidth = num_channels * sample_rate; // Vulnerable Location
     size_t total_allocation = channel_overhead + stream_bandwidth;
     return total_allocation;
 }
 // Vulnerability 2_CWE-789: Memory Allocation with Excessive Size Value
-char* allocate_auxiliary_buffer(size_t buffer_size) { // Vulnerable Location
-    char *buffer = (char *)malloc(buffer_size);
+char* allocate_auxiliary_buffer(size_t buffer_size) {
+    char *buffer = (char *)malloc(buffer_size); // Vulnerable Location
     if (!buffer) {
         log_telemetry_event("Memory allocation failure in auxiliary buffer");
         return NULL;

@@ -428,24 +428,11 @@ xxd crash_analysis/{name}.bin
 | **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2` |
 
 **Triggering Input & Reproduction Command:**
-The representative AFL++ input contains three telemetry directives:
 ```text
 sensor_id_ba=202
 cal_factor_up=0.95
 aux_bu44444444444444444444444444ff?r_request=128
 ```
-
-The first two directives are processed successfully. The third directive triggers the stack buffer overflow.
-
-The parser splits the third line at the first `=`:
-```text
-key   = aux_bu44444444444444444444444444ff?r_request
-value = 128
-```
-
-Both strings are passed to `process_telemetry_directive()` and later combined into `status_output[64]` using `sprintf()` without checking the output length.
-
-Reproduce using the ASan/UBSan-instrumented binary:
 ```bash
 ./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2"
 ```
@@ -493,24 +480,11 @@ A crafted telemetry directive can write beyond the 64-byte `status_output` stack
 | **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1` |
 
 **Triggering Input & Reproduction Command:**
-The representative AFL++ input contains three telemetry directives:
 ```text
 sens=202
 r_up=0.95
 aux_buffer_request=-2.\_buaux_buffer_request=-28
 ```
-
-The first two directives are processed before the third directive triggers the excessive memory allocation request.
-
-The parser splits the third line at the first `=`:
-```text
-key   = aux_buffer_request
-value = -2.\_buaux_buffer_request=-28
-```
-
-The value is passed to the `aux_buffer_request` branch in `process_telemetry_directive()`. Since `atoi()` stops converting at the first non-numeric character, the value is interpreted as `-2`. When cast to a 32-bit `size_t`, it becomes `0xfffffffe`, resulting in an excessive allocation request.
-
-Reproduce using the ASan/UBSan-instrumented binary:
 ```bash
 ./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1"
 ```
@@ -561,18 +535,10 @@ A crafted `aux_buffer_request` can cause an excessive memory allocation request.
 | **Reproducing Input File** | `findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16` |
 
 **Triggering Input & Reproduction Command:**
-The representative AFL++ input contains two telemetry lines:
 ```text
 s%nnsor_a_ba\<nnsor_a_ba<20st2
 cal_faq???????????quest=128
 ```
-
-The first line does not contain an `=` delimiter and includes the `%n` format specifier. As a result, `parse_telemetry_line()` treats it as invalid syntax and constructs an error message containing the original input.
-
-The error message is passed to `log_telemetry_event()`, where `printf(event_message)` interprets `%n` as a format specifier instead of ordinary text.
-
-Reproduce using the ASan/UBSan-instrumented binary:
-
 ```bash
 ./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16"
 ```
@@ -619,6 +585,52 @@ SUMMARY: AddressSanitizer: SEGV ... in libc.so.6
 
 **Exploitability Assessment:**
 A crafted telemetry line containing format specifiers such as `%n` can cause an invalid memory write during error logging. In the observed sanitizer execution, this results in a segmentation fault and denial of service. Format string vulnerabilities may also allow unintended memory access, but information disclosure or arbitrary code execution was not demonstrated in this test.
+
+---
+
+#### 4.2.4 Vulnerability 4
+| Field | Details |
+| :--- | :--- |
+| **Vulnerability Name** | `Signed Integer Overflow in Stream Buffer Size Calculation` |
+| **CWE Classification** | `CWE-190: Integer Overflow or Wraparound` |
+| **Target Component** | `sentinel_telemetry.c` |
+| **Vulnerable Location** | `calculate_stream_buffer_size()` L55: `size_t stream_bandwidth = num_channels * sample_rate;` |
+| **Reproducing Input File** | `fuzz_out_remediated_persistent_asan_ubsan/default/crashes/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4` |
+
+**Triggering Input & Reproduction Command:**
+```bash
+# Se
+subode=nal
+tre=or_id_pry=101^Ocal_factor_the=1.05
+log_event=d
+stream_multiplier=4444444444444444444444
+```
+```bash
+./sentinel_telemetry_remediated_asan_ubsan "findings/persistent_refuzzing/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4"
+```
+
+**Root Cause Analysis:**
+The stream_multiplier value is converted using atoi() without range validation. For crash 000000, GDB shows sample_rate = 2147483647 and num_channels = 4. Their multiplication in calculate_stream_buffer_size() exceeds the signed 32-bit integer range before the result is assigned to size_t, causing undefined behaviour.
+
+**GDB / Sanitiser Evidence:**
+```text
+Program received signal SIGILL, Illegal instruction.
+
+#0 calculate_stream_buffer_size
+   (num_channels=4, sample_rate=2147483647)
+   at sentinel_telemetry_remediated.c:55
+
+55 size_t stream_bandwidth = num_channels * sample_rate;
+
+#1 process_telemetry_directive
+   at sentinel_telemetry_remediated.c:88
+
+#2 parse_telemetry_line
+   at sentinel_telemetry_remediated.c:199
+```
+
+**Exploitability Assessment:**
+A crafted stream_multiplier can trigger signed integer overflow and crash the telemetry processor, resulting in denial of service. Arbitrary code execution was not demonstrated.
 
 ---
 
@@ -1233,18 +1245,100 @@ The impact is limited to denial of service. This is undefined behavior (a misali
 *[Provide sound, robust C code fixes for every identified vulnerability. Explain how each fix prevents memory corruption without breaking legitimate parsing functionality.]*
 
 #### Patch for Vulnerability 1 (`sentinel_telemetry.c`):
-```c
-// Provide the corrected C code block or diff
+```diff
+- sprintf(status_output,
++ snprintf(status_output,
++      sizeof(status_output),
+       "Directive parsed: %s=%s",
+       formatted_key,
+       formatted_value);
 ```
 **Technical Justification:**
-`[Explain how the patch fixes the root cause]`
+
+The original `sprintf()` did not check the output length, allowing the formatted message to overflow the 64-byte `status_output` buffer and overwrite adjacent stack memory.
+
+Replacing it with `snprintf()` limits the output to the buffer size, including the null terminator. Longer messages are truncated, preventing the stack buffer overflow while preserving normal processing of valid directives.
 
 #### Patch for Vulnerability 2 (`sentinel_telemetry.c`):
 ```c
-// Provide the corrected C code block or diff
+// original C code
+// size_t req_size = (size_t)atoi(formatted_value);  
+// char *aux = allocate_auxiliary_buffer(req_size);
+// if (aux) {
+// printf("Auxiliary stream memory reserved: %zu bytes.\n", req_size);
+// }
+
+// corrected C code
+char *endptr;
+long req_size = strtol(formatted_value, &endptr, 10);
+
+if (formatted_value[0] == '\0' ||
+    formatted_value[0] == '-' ||
+    endptr == formatted_value ||
+    *endptr != '\0' ||
+    req_size <= 0 ||
+    req_size > 1024 * 1024) {
+
+    printf("Invalid auxiliary buffer size.\n");
+
+} else {
+    char *aux = allocate_auxiliary_buffer((size_t)req_size);
+
+    if (aux) {
+        printf("Auxiliary stream memory reserved: %ld bytes.\n", req_size);
+        free(aux);
+    }
+}
 ```
 **Technical Justification:**
-`[Explain how the patch fixes the root cause]`
+
+The original code converted the result of `atoi()` directly to `size_t` without input validation. Negative values could become excessively large allocation sizes, causing the allocation failure identified in Task 3.
+
+The patch uses `strtol()` with input validation to reject invalid or oversized requests before memory allocation. The 1 MiB limit prevents excessive allocation, while valid requests such as `aux_buffer_request=128` remain supported. The allocated buffer is also freed after use.
+
+#### Patch for Vulnerability 3 (`sentinel_telemetry.c`):
+```diff
+- printf(event_message); 
++ printf("%s", event_message);
+```
+**Technical Justification:**
+
+The original `printf(event_message)` treated user-controlled input as a format string, allowing specifiers such as `%n` to cause unintended memory writes.
+
+Replacing it with `printf("%s", event_message)` treats the input as plain text instead of formatting instructions, preventing the format string vulnerability while preserving normal telemetry logging.
+
+#### Patch for Vulnerability 4 (`sentinel_telemetry.c`):
+```c
+// original C code
+// size_t channel_overhead = num_channels * sizeof(telemetry_entry_t);
+// size_t stream_bandwidth = num_channels * sample_rate; 
+
+// corrected C code
+if (num_channels <= 0 || sample_rate <= 0) {
+    return 0;
+}
+
+size_t channels = (size_t)num_channels;
+size_t rate = (size_t)sample_rate;
+
+if (channels > SIZE_MAX / rate ||
+    channels > SIZE_MAX / sizeof(telemetry_entry_t)) {
+    return 0;
+}
+
+size_t channel_overhead = channels * sizeof(telemetry_entry_t);
+size_t stream_bandwidth = channels * rate;
+
+if (stream_bandwidth > SIZE_MAX - channel_overhead) {
+    return 0;
+}
+```
+
+**Technical Justification:**
+
+The original code multiplied two signed integers without checking their values, which could cause integer overflow before the result was assigned to `size_t`.
+
+The patch rejects invalid values and converts num_channels to `size_t` before multiplication. It also checks for overflow before adding the buffer sizes, while allowing valid stream calculations to continue.
 
 #### Patch for Vulnerability X (`sentinel_payload.c`):
 ```c
