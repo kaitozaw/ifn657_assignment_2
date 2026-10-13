@@ -1,0 +1,5 @@
+sensor_id_1=202
+cal_factor_1=0.95
+log_event=Telemetry operational
+aux_buffer_request=128
+stream_multiplier=2
