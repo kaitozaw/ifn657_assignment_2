@@ -11,7 +11,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdint.h>
-#include <limits.h>
 
 #define MAX_LABEL_LEN 64
 #define MAX_FRAME_CAPACITY 1024
@@ -37,20 +36,24 @@ void log_payload_error(const char *error_description) {
 }
 
 size_t calculate_frame_dimension_size(unsigned int width, unsigned int height, unsigned int depth) {
+    if (width == 0 || height == 0 || depth == 0) {
+        log_payload_error("Width, height, and depth cannot be 0.");
+        return 0;
+    }
     size_t total_size = width;
-    if (total_size > (UINT_MAX / height)) {
+    if (total_size > (SIZE_MAX / height)) {
         log_payload_error("Frame dimension exceeds permitted size.");
-        return -1;
+        return 0;
     }
     total_size *= height;
-    if (total_size > (UINT_MAX / depth)) {
+    if (total_size > (SIZE_MAX / depth)) {
         log_payload_error("Frame dimension exceeds permitted size.");
-        return -1;
+        return 0;
     }
     total_size *= depth;
-    if (total_size >= UINT_MAX) {
+    if (total_size >= SIZE_MAX) {
         log_payload_error("Frame dimension exceeds permitted size.");
-        return -1; 
+        return 0;
     }
     return total_size;
 }
@@ -96,7 +99,12 @@ void process_payload_data(const char *input_bytes, size_t input_size) {
         global_frame->is_valid = 1;
         strncpy(global_frame->sensor_type, "SPECTRAL_RADAR", sizeof(global_frame->sensor_type) - 1);
     }
-    
+
+    if (input_bytes == 0 || input_bytes > global_frame->size) {
+        log_payload_error("Payload data is missing or exceeds the maximum frame capacity.");
+        return;
+    }
+
     memcpy(global_frame->data, input_bytes, input_size);
     printf("Transferred %zu bytes into observation buffer.\n", input_size);
 }
@@ -111,21 +119,16 @@ int parse_payload_file(FILE *fp) {
         return -1;
     }
 
-    if (width > UINT_MAX || height > UINT_MAX || depth > UINT_MAX) {
+    if (sscanf(header_line, "PAYLOAD_FRAME %u %u %u %63s", &width, &height, &depth, label_buffer) != 4) {
+        log_payload_error(header_line);
+        return -1;
+    }
+
+    if (width >= SIZE_MAX || height >= SIZE_MAX || depth >= SIZE_MAX) {
         log_payload_error("Width, height, or depth exceeds the permitted size.");
         return -1;
     }
 
-    if (sizeof(label_buffer) >= MAX_LABEL_LEN) {
-        log_payload_error("Label exceeds the permitted size.");
-        return -1;
-    }
-
-    if (sscanf(header_line, "PAYLOAD_FRAME %u %u %u %s", &width, &height, &depth, label_buffer) != 4) {
-        log_payload_error(header_line);
-        return -1;
-    }
-    
     process_frame_label(label_buffer);
     
     size_t expected_data_size = calculate_frame_dimension_size(width, height, depth);
@@ -183,7 +186,7 @@ int old_main(int argc, char **argv) {
 int main(int argc, char **argv) {
     int res = 0;
     while (__AFL_LOOP(10000)) {
-        global_frame = NULL;
+        cleanup_active_frame();
         res = old_main(argc, argv);
     }
     return res;
