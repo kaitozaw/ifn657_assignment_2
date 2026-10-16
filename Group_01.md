@@ -628,7 +628,6 @@ When the `malloc()` function is called on line 113, the `stream_data` variable o
 **GDB / Sanitiser Evidence:**
 
 ```bash
-rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
 === Sentinel-1 Scientific Payload Ingestion Subsystem ===
 Processing observation frame label: BBBBB1111
 Payload frame dimensions: 1 x 1 x 4294967295 (4294967295 bytes required)
@@ -728,7 +727,6 @@ The source code contains a specific frame inspection trigger on line 127: when `
 **GDB / Sanitiser Evidence:**
 
 ```bash
-rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
 === Sentinel-1 Scientific Payload Ingestion Subsystem ===
 Processing observation frame label: 11111111111111AA
 Payload frame dimensions: 1337 x 8 x 8 (85568 bytes required)
@@ -840,7 +838,6 @@ The `label_buffer` array is declared with an array size of 128 bytes, this is do
 **GDB / Sanitiser Evidence:**
 
 ```bash
-rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
 === Sentinel-1 Scientific Payload Ingestion Subsystem ===
 =================================================================
 ==1767==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf6800050 at pc 0x566be803 bp 0xffd33b08 sp 0xffd336dc
@@ -943,7 +940,6 @@ The `sscanf()` function returns `0`, causing the `if sscanf(header_line, "PAYLOA
 **GDB / Sanitiser Evidence:**
 
 ```bash
-rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_msan crash_analysis/format-string-vulnerability01.bin
 === Sentinel-1 Scientific Payload Ingestion Subsystem ===
 [PAYLOAD ERROR] MemorySanitizer:DEADLYSIGNAL
 ==1748==ERROR: MemorySanitizer: SEGV on unknown address 0xffffffffffffffff (pc 0x7ffff7c6fb72 bp 0x7fffffffd7f0 sp 0x7fffffffd2d0 T1748)
