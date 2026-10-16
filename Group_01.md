@@ -324,8 +324,9 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 
 sentinel_telemetry
 
-![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_03_dict.jpg)
-![sentinel_telemetry AFL++ Summary Stats](images/sentinel_telemetry/sentinel_telemetry_03_dict_summary.jpg)
+![sentinel_telemetry AFL++ Summary Stats_baseline](images/sentinel_telemetry/sentinel_telemetry_01_nosan.jpg)
+![sentinel_telemetry AFL++ Summary Stats_paralle fuzzing](images/sentinel_telemetry/sentinel_telemetry_02_asan_ubsan.jpg)
+![sentinel_telemetry AFL++ Status Screen_dic](images/sentinel_telemetry/sentinel_telemetry_03_dict.jpg)
 
 sentinel_payload
 
