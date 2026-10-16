@@ -45,11 +45,10 @@ afl-clang-fast -m32 -g -O0 -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
 
 ```bash
 echo core | sudo tee /proc/sys/kernel/core_pattern
-afl-fuzz -i seeds -o findings/fuzz_out_nosan ./sentinel_telemetry_nosan @@
-```
-
-```bash
-afl-fuzz -i seeds -o findings/fuzz_out_asan_ubsan -m none ./sentinel_telemetry_asan_ubsan @@
+afl-fuzz -i seeds -o fuzz_out_nosan ./sentinel_telemetry_nosan @@
+afl-fuzz -i seeds -o fuzz_out_parallel -M main -x dict ./sentinel_telemetry_nosan @@
+afl-fuzz -i seeds -o fuzz_out_parallel -S secondary -x dict ./sentinel_telemetry_nosan @@
+afl-fuzz -i seeds -o fuzz_out_asan_ubsan -m none ./sentinel_telemetry_asan_ubsan @@
 ```
 
 #### 3. Crash Triage
