@@ -1342,7 +1342,7 @@ The patch checks the input values before multiplication and uses `size_t` for th
 
 ---
 
-#### Patch for Vulnerability 1 (`sentinel_payload.c`):
+#### Patch for Vulnerability 5 (`sentinel_payload.c`):
 
 1. Updated `calculate_frame_dimension_size()`:
 
@@ -1399,7 +1399,7 @@ The `process_payload_data()` was updated to detect potential heap buffer overflo
 
 ---
 
-#### Patch for Vulnerability 2 (`sentinel_payload.c`):
+#### Patch for Vulnerability 6 (`sentinel_payload.c`):
 
 1. Updated `cleanup_active_frame()`:
 
@@ -1432,7 +1432,7 @@ While it is never dereferenced in the current `sentinel_payload` source code, `s
 
 ---
 
-#### Patch for Vulnerability 3 (`sentinel_payload.c`):
+#### Patch for Vulnerability 7 (`sentinel_payload.c`):
 
 1. Updated `process_frame_label()`:
 
@@ -1468,7 +1468,7 @@ Finally, the width component of the `%s` format specifier defined in the `sscanf
 
 ---
 
-#### Patch for Vulnerability 4 (`sentinel_payload.c`):
+#### Patch for Vulnerability 8 (`sentinel_payload.c`):
 
 1. Updated `log_payload_error()`:
 
@@ -1484,7 +1484,7 @@ The `fprintf()` function is now properly defined with the correct number of form
 
 ---
 
-#### Patch for Vulnerability 11 (`sentinel_network.c`):
+#### Patch for Vulnerability 9 (`sentinel_network.c`):
 ```c
 snprintf(header_summary, sizeof(header_summary), "Command Type: %d, Length: %d, Magic: 0x%x, Data: %.*s",
         pkt->type, pkt->length, pkt->magic, pkt->length, (char *)pkt->data);
@@ -1492,21 +1492,21 @@ snprintf(header_summary, sizeof(header_summary), "Command Type: %d, Length: %d, 
 **Technical Justification:**
 `snprintf` bounds the write to `sizeof(header_summary)` and `%.*s` limits the read to `pkt->length`, preventing both the stack overflow and the over-read.
 
-#### Patch for Vulnerability 12 (`sentinel_network.c`):
+#### Patch for Vulnerability 10 (`sentinel_network.c`):
 ```c
 payload_size = pkt->length;
 ```
 **Technical Justification:**
 Using `pkt->length` directly (it already excludes the header) removes the subtraction that underflowed to a huge unsigned size.
 
-#### Patch for Vulnerability 13 (`sentinel_network.c`):
+#### Patch for Vulnerability 11 (`sentinel_network.c`):
 ```c
 payload_size = pkt->length;
 ```
 **Technical Justification:**
 Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 8-byte heap overflow.
 
-#### Patch for Vulnerability 14 (`sentinel_network.c`):
+#### Patch for Vulnerability 12 (`sentinel_network.c`):
 ```c
 void emergency_command_cleanup(void) {
     for (int i = 0; i < active_telecommand_count; i++) {
@@ -1521,7 +1521,7 @@ void emergency_command_cleanup(void) {
 **Technical Justification:**
 Nulling each freed pointer and resetting the count makes repeated cleanup calls no-ops, preventing the use-after-free and double free.
 
-#### Patch for Vulnerability 15 (`sentinel_network.c`):
+#### Patch for Vulnerability 13 (`sentinel_network.c`):
 ```c
 typedef struct __attribute__((packed)) {
     uint32_t magic;
