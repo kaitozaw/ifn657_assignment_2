@@ -74,54 +74,17 @@ done
 ```
 
 ```bash
-for log in crash_logs/*.log; do
-  key=$(awk '
-    /ERROR: AddressSanitizer:/ && !type {
-      match($0, /AddressSanitizer: [a-z-]+/); type=substr($0, RSTART+18, RLENGTH-18); next }
-    type && /^ *#[0-9]+ / {
-      sub(/^ *#[0-9]+ 0x[0-9a-f]+ in /, "")
-      gsub(/\/[^ ]*\//, "")
-      if ($0 ~ /:[0-9]+:[0-9]+$/) sub(/:[0-9]+$/, "")
-      if ($0 ~ /^(__asan|__interceptor|__sanitizer)/) next
-      key = key " > " $0
-      if (++n == 3) exit
-    }
-    type && n && /^$/ { exit }
-    END { print (type ? type : "no-repro") " |" key }' "$log")
-  printf "%s\t%s\n" "$key" "$(tail -1 "$log")"
-done > crash_buckets.tsv
-```
-
-```bash
-mkdir -p crash_analysis
-declare -A num
-awk -F'\t' '
-  { cnt[$1]++; if (!($1 in rep)) rep[$1] = $2 }
-  END { for (k in cnt) printf "%d\t%s\t%s\n", cnt[k], k, rep[k] }
-' crash_buckets.tsv \
-| sort -t$'\t' -k1,1nr \
-| while IFS=$'\t' read -r cnt key rep; do
-    type=${key%% |*}
-    num[$type]=$(( ${num[$type]:-0} + 1 ))
-    name=$(printf "%s%02d" "$type" "${num[$type]}")
-    printf "[%d crashes] %s\nbucket: %s\nrepresentative crash: %s\n\n" "$cnt" "$name" "$key" "$rep"
-    [ "$type" = "no-repro" ] && continue
-    afl-tmin -i "$rep" -o "crash_analysis/$name.bin" -- ./sentinel_payload_asan_ubsan @@ < /dev/null > /dev/null 2>&1
-  done
-```
-
-```bash
 ./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
 ./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
 ./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
-./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+./sentinel_payload_msan crash_analysis/format-string-vulnerability01.bin
 ```
 
 ```bash
 gdb --args ./sentinel_payload_asan_ubsan crash_analysis/heap-buffer-overflow01.bin
 gdb --args ./sentinel_payload_asan_ubsan crash_analysis/heap-use-after-free01.bin
 gdb --args ./sentinel_payload_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
-gdb --args ./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+gdb --args ./sentinel_payload_msan crash_analysis/format-string-vulnerability01.bin
 ```
 
 #### 4. Remediation Verification
@@ -130,7 +93,7 @@ gdb --args ./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
 ./sentinel_payload_remediated crash_analysis/heap-buffer-overflow01.bin
 ./sentinel_payload_remediated crash_analysis/heap-use-after-free01.bin
 ./sentinel_payload_remediated crash_analysis/stack-buffer-overflow01.bin
-./sentinel_payload_remediated crash_analysis/stack-buffer-underflow01.bin
+./sentinel_payload_remediated crash_analysis/format-string-vulnerability01.bin
 ```
 
 ---
