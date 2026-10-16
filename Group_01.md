@@ -1736,18 +1736,11 @@ afl-fuzz -i seeds -o findings/remediated -x dict ./sentinel_network_remediated @
 
 ### 6.1 Target Vulnerability & Security Consequence
 
-- **Target Component:** `sentinel_payload.c`
-    - **Vulnerability Selected:** `[e.g. Format String Arbitrary Write / Stack Buffer Overflow Hijack]`
-    - **Actionable Exploit Consequence:** `[Describe the tangible exploit objective achieved]`
 - **Target Component:** `sentinel_network.c`
-    - **Vulnerability Selected:** `Vulnerability 13: Logical Flaw in Payload Size Calculation Leading to Heap Buffer Overflow`
-    - **Actionable Exploit Consequence:** `control flow hijacking`
+- **Vulnerability Selected:** `Vulnerability 13: Logical Flaw in Payload Size Calculation Leading to Heap Buffer Overflow`
+- **Actionable Exploit Consequence:** `control flow hijacking`
 
 ### 6.2 Memory Layout & Address Analysis
-
-#### sentinel_payload
-
-`[Complete this section with stack/memory diagrams and GDB address resolution steps]`
 
 #### sentinel_network
 
@@ -1905,11 +1898,6 @@ Thruster calibration telecommand processed successfully.
 
 ### 6.3 Complete Exploit Script
 
-#### sentinel_payload
-```python
-
-```
-
 #### sentinel_network
 ```python
 #!/usr/bin/env python3
@@ -1952,17 +1940,6 @@ if __name__ == "__main__":
 ```
 
 ### 6.4 Reproduction Instructions & Live Bash Evidence
-
-#### sentinel_payload
-```bash
-# Commands to execute the exploit
-# For example, `python3 exploit.py > exploit_payload.bin` then `./target_binary exploit_payload.bin`
-```
-
-**Observed Terminal Output & Verification:**
-```text
-[Paste terminal output proving successful exploit execution]
-```
 
 #### sentinel_network
 ```bash
