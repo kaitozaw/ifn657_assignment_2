@@ -26,6 +26,64 @@ Fuzzing, crash triage and remediation of three targets: `sentinel_network`, `sen
 ### `sentinel_telemetry.c`
 
 ```bash
+cd sentinel_telemetry/
+```
+
+#### 1. Compilation
+
+```bash
+afl-clang-fast -m32 -g -O0 -o sentinel_telemetry_nosan sentinel_telemetry.c
+```
+
+```bash
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -m32 -g -O0 -o sentinel_telemetry_asan_ubsan sentinel_telemetry.c
+```
+
+#### 2. Fuzzing Status
+
+```bash
+echo core | sudo tee /proc/sys/kernel/core_pattern
+afl-fuzz -i seeds -o findings/fuzz_out_nosan ./sentinel_telemetry_nosan @@
+```
+
+```bash
+afl-fuzz -i seeds -o findings/fuzz_out_asan_ubsan -m none ./sentinel_telemetry_asan_ubsan @@
+```
+
+#### 3. Crash Triage
+
+```bash
+mkdir -p crash_logs
+for f in out/*/crashes/id:*; do
+  name=$(echo "$f" | tr '/:,' '___')
+  timeout 10 ./sentinel_telemetry_asan_ubsan "$f" > "crash_logs/$name.log" 2>&1
+  echo "$f" >> "crash_logs/$name.log"
+done
+```
+
+```bash
+./sentinel_telemetry_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
+./sentinel_telemetry_asan_ubsan crash_analysis/requested01.bin
+./sentinel_telemetry_asan_ubsan crash_analysis/format-string01.bin
+./sentinel_telemetry_remediated_asan_ubsan crash_analysis/integer-overflow01.bin
+```
+
+```bash
+gdb --args ./sentinel_telemetry_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
+gdb --args ./sentinel_telemetry_asan_ubsan crash_analysis/requested01.bin
+gdb --args ./sentinel_telemetry_asan_ubsan crash_analysis/format-string01.bin
+gdb --args ./sentinel_telemetry_remediated_asan_ubsan crash_analysis/integer-overflow01.bin
+```
+
+#### 4. Remediation Verification
+
+```bash
+./sentinel_telemetry_remediated crash_analysis/stack-buffer-overflow01.bin
+./sentinel_telemetry_remediated crash_analysis/requested01.bin
+./sentinel_telemetry_remediated crash_analysis/format-string01.bin
+./sentinel_telemetry_remediated crash_analysis/integer-overflow01.bin
 ```
 
 ---
