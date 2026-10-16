@@ -30,13 +30,13 @@
 
 | Task | Status | `asciinema` Timestamp (mm:ss) | Notes |
 | :--- | :--- | :--- | :--- |
-| **Task 0: Claims, Demo & Teamwork** | [Completed / Incomplete] | [00:00] | Any additional notes. |
-| **Task 1: Setup** | [Completed / Incomplete]  | [00:30] | Briefly describe how this task is completed. |
-| **Task 2: Fuzzing Execution** | [Completed / Incomplete]  | [01:30] | Briefly describe how this task is completed. |
-| **Task 3: Vulnerability Analysis** | [Completed / Incomplete]  | [03:00] | Briefly describe how this task is completed. |
-| **Task 4: Code Remediation** | [Completed / Incomplete]  | [05:30] | Briefly describe how this task is completed. |
-| **Task 5: Proof-of-Concept Exploitation** | [Completed / Incomplete]  | [07:00] | Briefly describe how this task is completed. |
-| **Total Number of Distinct Vulnerabilities Found** | [The total number] | N/A | Any additional notes. |
+| **Task 0: Claims, Demo & Teamwork** | Completed | 00:09 | ASan/UBSan variables unset before recording |
+| **Task 1: Setup** | Completed | 00:35 | Compiled three targets with AFL++ and sanitizers |
+| **Task 2: Fuzzing Execution** | Completed  | 03:08 | Demonstrated two fuzzing instances |
+| **Task 3: Vulnerability Analysis** | Completed  | 04:10 | Reproduced two distinct memory vulnerabilities |
+| **Task 4: Code Remediation** | Completed  | 10:36 | Verified fixes using the same crash inputs |
+| **Task 5: Proof-of-Concept Exploitation** | Completed  | 10:54 | Demonstrated exploit execution |
+| **Total Number of Distinct Vulnerabilities Found** | 13 | N/A | N/A |
 
 ---
 
