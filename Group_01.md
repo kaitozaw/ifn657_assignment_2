@@ -959,8 +959,8 @@ The stack buffer overflow vulnerability can impact the confidentiality, integrit
 
 | Field                  | Details |
 | :--------------------- | :------ |
-| Vulnerability Name     | Stack Buffer Underflow, Format String Vulnerability |
-| CWE Classification     | CWE-124: Buffer Underwrite ('Buffer Underflow'), CWE-134: Use of Externally-Controlled Format String |
+| Vulnerability Name     | Format String Vulnerability |
+| CWE Classification     | CWE-134: Use of Externally-Controlled Format String |
 | Target Component       | `sentinel_payload.c` |
 | Vulnerable Location    | `fprintf()`, line 35, `fprintf(stderr, error_description);` |
 | Reproducing Input File | `sentinel_payload/out/msan/crashes/id\:000001\,sig\:11\,src\:000004\,time\:27\,execs\:135\,op\:havoc\,rep\:7` |
@@ -972,7 +972,7 @@ PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n
 ```
 
 ```bash
-./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+./sentinel_payload_msan crash_analysis/format-string-vulnerability01.bin
 ```
 
 **Root Cause Analysis:**
@@ -991,7 +991,7 @@ The `sscanf()` function returns `0`, causing the `if sscanf(header_line, "PAYLOA
 **GDB / Sanitiser Evidence:**
 
 ```bash
-rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_msan crash_analysis/stack-buffer-underflow01.bin
+rachel@RCHL-LTPX1:~/ifn657_assignment_2/sentinel_payload$ ./sentinel_payload_msan crash_analysis/format-string-vulnerability01.bin
 === Sentinel-1 Scientific Payload Ingestion Subsystem ===
 [PAYLOAD ERROR] MemorySanitizer:DEADLYSIGNAL
 ==1748==ERROR: MemorySanitizer: SEGV on unknown address 0xffffffffffffffff (pc 0x7ffff7c6fb72 bp 0x7fffffffd7f0 sp 0x7fffffffd2d0 T1748)
@@ -1020,7 +1020,7 @@ SUMMARY: MemorySanitizer: SEGV stdio-common/vfprintf-process-arg.c:356:21 in __p
 
 **Exploitability Assessment:**
 
-The stack buffer underflow and format string vulnerabilities can impact the confidentiality, integrity, and availability of the system. Successful exploitation of these vulnerabilities enables execution of arbitrary code by reading and writing to the stack as well as denial of service by crashing. According to CWE, CWE-124 Buffer Underwrite ('Buffer Underflow') has a medium likelihood while CWE-134 Use of Externally-Controlled String has a high likelihood. Due to the lack of user input validation, an attacker can easily and reliably exploit both vulnerabilities by supplying a payload with an invalid header line format and which also includes format specifiers, such as `%x` or `%n`, to read and write to the stack. Based on the NIST guidelines, the overall security impact of this vulnerability is considered high.
+The format string vulnerability can impact the confidentiality, integrity, and availability of the system. Successful exploitation of this vulnerability enables execution of arbitrary code by reading and writing to the stack as well as denial of service by crashing. According to CWE, CWE-134 Use of Externally-Controlled String has a high likelihood. Due to the lack of user input validation, an attacker can easily and reliably exploit the vulnerability by supplying a payload with an invalid header line format and which also includes format specifiers, such as `%x` or `%n`, to read and write to the stack. Based on the NIST guidelines, the overall security impact of this vulnerability is considered high.
 
 ---
 
