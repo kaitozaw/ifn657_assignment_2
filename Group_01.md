@@ -638,8 +638,8 @@ A crafted stream_multiplier can trigger signed integer overflow and crash the te
 
 | Field                  | Details |
 | :--------------------- | :------ |
-| Vulnerability Name     | Heap Buffer Overflow |
-| CWE Classification     | CWE-122: Heap-Based Buffer Overflow |
+| Vulnerability Name     | Integer Overflow, Heap Buffer Overflow |
+| CWE Classification     | CWE-190: Integer Overflow or Wraparound, CWE-122: Heap-Based Buffer Overflow |
 | Target Component       | `sentinel_payload.c` |
 | Vulnerable Location    | `fread()`, line 119, `fread(stream_data, 1, expected_data_size, fp);` |
 | Reproducing Input File | `sentinel_payload/out/nosan/crashes/id\:000003\,sig\:11\,src\:000001\,time\:17339\,execs\:349023\,op\:havoc\,rep\:7` |
@@ -667,9 +667,9 @@ The header line, `PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B`, is parsed b
 | `depth`        | `1111111111111111111` |
 | `label_buffer` | `BBBBB1111` |
 
-The value of `depth` is formatted into a 32-bit unsigned integer with the `%u` format specifier. However, 32-bit unsigned integers can only hold up to 4,294,967,295 values (i.e., 2 ^ (32 - 1)). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, the `%u` format specifier is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
+The value of `depth` is parsed as a 32-bit unsigned integer. However, 32-bit unsigned integers can only hold up to 4,294,967,295 values (i.e., 2^(32 - 1) values). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, a 32-bit system is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
 
-When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is essentially allocated a memory size of `4294967295 + 1`. This evaluates to `0` and causes the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25 bytes read into a 0-byte memory.
+When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is allocated memory of `4294967295 + 1`. This triggers an integer overflow and evaluates as `0`, causing the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25-bytes read into a `NULL` pointer (i.e., `malloc(0)`).
 
 **GDB / Sanitiser Evidence:**
 
@@ -734,7 +734,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
 
 **Exploitability Assessment:**
 
-The heap buffer overflow vulnerability can impact the availability of the system. Successful exploitation can result in denial of service by crashing. According to CWE, CWE-122 Heap-Based Buffer Overflow has a high likelihood of exploitation. An attacker can easily supply a value exceeding the maximum limit of a 32-bit unsigned integer. The likelihood is further increased by the expanded attack surface, as the system expects and processes three user-supplied unsigned integer values (i.e., `width`, `height`, and `depth`) from the payload's header line, each of which could potentially trigger the heap buffer overflow. The non-zero risk of human error and lack of user input validation is another contributing factor. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+The integer overflow and heap buffer overflow vulnerabilities can impact the availability of the system. Successful exploitation can result in denial of service by crashing. According to CWE, CWE-190: Integer Overflow or Wraparound has a medium likelihood of exploitation while CWE-122: Heap-Based Buffer Overflow has a high likelihood of exploitation. An attacker can easily supply a value exceeding the maximum limit of a 32-bit unsigned integer. The likelihood is further increased by the expanded attack surface, as the system expects and processes three externally-supplied unsigned integer values (i.e., `width`, `height`, and `depth`) from the payload's header line, each of which could potentially trigger the integer overflow and heap buffer overflow. The non-zero risk of human error and lack of input validation is another contributing factor. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
 
 ---
 
@@ -769,7 +769,7 @@ The header line, `PAYLOAD_FRAME1337 8 8 11111111111111AA`, is parsed by the `ssc
 | `depth`        | `8`   |
 | `label_buffer` | `11111111111111AA` |
 
-The source code contains a specific frame inspection trigger on line 127: when `width` is equal to 1337, the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively. As the `cleanup_active_frame()` function only frees `global_frame` and `global_frame->data` without setting to `NULL`, it creates two dangling pointers that become use-after-free (UAF) vulnerabilities. The `inspect_cached_frame()` function immediately dereferences both `global_frame` and `global_frame->data`, which triggers the UAF and crashes the program.
+The source code contains a specific frame inspection trigger on line 127: when `width` is equal to `1337`, the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively. As the `cleanup_active_frame()` function only frees `global_frame` and `global_frame->data` without reinitialising to `NULL`, it creates two dangling pointers. The `inspect_cached_frame()` function immediately dereferences both `global_frame` and `global_frame->data`, which triggers the use-after-free vulnerability and crashes the program.
 
 **GDB / Sanitiser Evidence:**
 
@@ -846,7 +846,7 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
 
 **Exploitability Assessment:**
 
-The heap use-after-free vulnerability can impact the integrity and availability of the system. Successful exploitation can result in unintended modification of the heap and denial of service by crashing. According to CWE, there is a high likelihood of exploitation. An attacker can easily and reliably exploit the heap use-after-free vulnerability by setting `width` to `1337`. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
+The heap use-after-free vulnerability can impact the integrity and availability of the system. Successful exploitation can result in unintended modification of the heap and denial of service by crashing. According to CWE, CWE-416: Heap Use After Free has a high likelihood of exploitation. An attacker can easily and reliably exploit the vulnerability by setting `width` to `1337`. Based on the NIST guidelines, the overall security impact of this vulnerability is considered moderate.
 
 ---
 
@@ -979,10 +979,10 @@ The header line, `PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n`, is parsed by the `s
 
 | Variable       | Value |
 | :------------- | :---- |
-| `width`        | Uninitilised. |
-| `height`       | Uninitilised. |
-| `depth`        | Uninitilised. |
-| `label_buffer` | Uninitilised. |
+| `width`        | Uninitialised. |
+| `height`       | Uninitialised. |
+| `depth`        | Uninitialised. |
+| `label_buffer` | Uninitialised. |
 
 The `sscanf()` function returns `0`, causing the `if sscanf(header_line, "PAYLOAD_FRAME %u %u %u %127s", &width, &height, &depth, label_buffer) != 4;` condition to evaluate as `true`. As a result, `log_payload_error()` is called with `header_line` as an argument. As `header_line` contains the `%n` format specifier, the function attempts to write the number of preceding characters printed so far to an invalid or unintended memory address. This triggers the format string vulnerability and leads to memory corruption.
 
@@ -1340,12 +1340,149 @@ The original code multiplied two signed integers without checking their values, 
 
 The patch checks the input values before multiplication and uses `size_t` for the calculation. It also checks whether the result would exceed `SIZE_MAX`.
 
-#### Patch for Vulnerability X (`sentinel_payload.c`):
+---
+
+#### Patch for Vulnerability 1 (`sentinel_payload.c`):
+
+1. Updated `calculate_frame_dimension_size()`:
+
 ```c
-// Provide the corrected C code block or diff
+size_t calculate_frame_dimension_size(unsigned int width, unsigned int height, unsigned int depth) {
+    if (width == 0 || height == 0 || depth == 0) {
+        log_payload_error("Width, height, and depth cannot be 0.");
+        return 0;
+    }
+    size_t total_size = width;
+    if (total_size > (SIZE_MAX / height)) {
+        log_payload_error("Frame dimension exceeds permitted size.");
+        return 0;
+    }
+    total_size *= height;
+    if (total_size > (SIZE_MAX / depth)) {
+        log_payload_error("Frame dimension exceeds permitted size.");
+        return 0;
+    }
+    total_size *= depth;
+    if (total_size >= SIZE_MAX) {
+        log_payload_error("Frame dimension exceeds permitted size.");
+        return 0;
+    }
+    return total_size;
+}
 ```
+
+2. Updated `parse_payload_file()`:
+
+```c
+if (width >= SIZE_MAX || height >= SIZE_MAX || depth >= SIZE_MAX) {
+    log_payload_error("Width, height, or depth exceeds the permitted size.");
+    return -1;
+}
+```
+
+3. Updated `process_payload_data()`:
+
+```c
+if (input_bytes == NULL || input_bytes > global_frame->size) {
+    log_payload_error("Payload data is missing or exceeds the maximum frame capacity.");
+    return;
+}
+```
+
 **Technical Justification:**
-`[Explain how the patch fixes the root cause]`
+
+The `calculate_frame_dimensions_size()` function was updated to detect potential integer overflow during multiplication. Instead of multiplying the `width`, `height`, and `depth` values simultaneously, the function now checks each multiplication against `SIZE_MAX`, which represents the maximum value of an unsigned integer (i.e., 4,294,967,295 on 32-bit systems), to ensure that the resulting `total_size` does not exceed the maximum representable value. If an integer overflow is detected, the program prints an error message and terminates further processing, preventing subsequent memory allocation using an incorrect size.
+
+The `parse_payload_file()` function was updated with input validation for `width`, `height`, and `depth`. If any one of these values are equal to or larger than `SIZE_MAX`, the program prints an error message and terminates further processing.
+
+The `process_payload_data()` was updated to detect potential heap buffer overflow before `memcpy()` is called. If `input_bytes` is `NULL` or larger than the maximum frame capacity (i.e., 1024 bytes defined by `MAX_FRAME_CAPACIY`), the program prints an error message and terminates further processing.
+
+---
+
+#### Patch for Vulnerability 2 (`sentinel_payload.c`):
+
+1. Updated `cleanup_active_frame()`:
+
+```c
+void cleanup_active_frame(void) {
+    if (global_frame) {
+        if (global_frame->data) {
+            free(global_frame->data);
+            global_frame->data = NULL;
+        }
+        free(global_frame);
+        global_frame = NULL;
+        printf("Active observation frame released from cache.\n");
+    }
+}
+```
+
+2. Updated `parse_payload_file()`:
+
+```c
+free(stream_data);
+stream_data = NULL;
+```
+
+**Technical Justification:**
+
+Both `global_frame` and `global_frame->data` are now reintialised as `NULL` once freed. This prevents the program from crashing when the `cleanup_active_frame()` and `inspect_cached_frame()` functions are called consecutively.
+
+While it is never dereferenced in the current `sentinel_payload` source code, `stream_data` is also freed without being reinitialised as `NULL`, creating another dangling pointer. For best practice, this was also patched.
+
+---
+
+#### Patch for Vulnerability 3 (`sentinel_payload.c`):
+
+1. Updated `process_frame_label()`:
+
+```c
+void process_frame_label(const char *label) {
+    char local_label[MAX_LABEL_LEN];
+    strncpy(local_label, label, MAX_LABEL_LEN - 1);
+    local_label[MAX_LABEL_LEN - 1] = '\0';
+    printf("Processing observation frame label: %s\n", local_label);
+}
+```
+
+2. Updated `parse_payload_file()`:
+
+```c
+char label_buffer[MAX_LABEL_LEN];
+```
+
+```c
+if (sscanf(header_line, "PAYLOAD_FRAME %u %u %u %63s", &width, &height, &depth, label_buffer) != 4) {
+    log_payload_error(header_line);
+    return -1;
+}
+```
+
+**Technical Justification:**
+
+The buffer size of `label_buffer` and `local_label` arrays are now set to `MAX_LABEL_LEN` for consistency. This makes future adjustments more convenient, as the declaration of buffer size for all label-related variables across the program is now centralised to one line of code: `#define MAX_LABEL_LEN 64`.
+
+The `strcpy()` function used in `process_frame_label()` was changed to `strncpy()`, this ensures only `MAX_LABEL_LEN - 1` bytes are copied from `label` into `local_label`. Additionally, `local_label[MAX_LABEL_LEN - 1]` is now initialised as `\0` to ensure the string is properly null-terminated.
+
+Finally, the width component of the `%s` format specifier defined in the `sscanf()` function was changed from `127` to `63`. This more accurately reflects the maximum permitted number of bytes.
+
+---
+
+#### Patch for Vulnerability 4 (`sentinel_payload.c`):
+
+1. Updated `log_payload_error()`:
+
+```c
+void log_payload_error(const char *error_description) {
+    fprintf(stderr, "[PAYLOAD ERROR] %s\n", error_description);
+}
+```
+
+**Technical Justification:**
+
+The `fprintf()` function is now properly defined with the correct number of format specifiers and corresponding arguments. The `%s` format specifier appropriately parses `error_description` in string format. This prevents any unintended processing of additional format specifiers found within `error_description`, such as `%x` or `%n`, which can allow reading of and writing to the stack.
+
+---
 
 #### Patch for Vulnerability 11 (`sentinel_network.c`):
 ```c
@@ -1446,9 +1583,38 @@ Exit code: 0
 ```
 
 sentinel_payload
-```bash
-# Demonstrate executing the patched binaries against all triggering crash inputs
 
+All triggering crash inputs were executed against the patched `sentinel_payload` binary.
+
+```bash
+export AFL_USE_ASAN=1
+export AFL_USE_UBSAN=1
+afl-clang-fast -m32 -std=c99 -w -g -o sentinel_payload_remediated sentinel_payload_remediated.c
+
+# ./sentinel_payload_remediated crash_analysis/heap-buffer-overflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+[PAYLOAD ERROR] Width, height, or depth exceeds the permitted size.
+
+# ./sentinel_payload_remediated crash_analysis/heap-use-after-free01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+Processing observation frame label: 11111111111111AA
+Payload frame dimensions: 1337 x 8 x 8 (85568 bytes required)
+Read 0 bytes from payload observation stream.
+[PAYLOAD ERROR] Payload data is missing or exceeds the maximum frame capacity.
+Active observation frame released from cache.
+No active frame currently cached.
+
+# ./sentinel_payload_remediated crash_analysis/stack-buffer-overflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+Processing observation frame label: RADAR_SCACCCCCCCCCCCCCCCBBBBBBBBBBBBBBBBBBBBBBBBBAAAAAAAAAAAAAA
+Payload frame dimensions: 8 x 8 x 1 (64 bytes required)
+Read 0 bytes from payload observation stream.
+[PAYLOAD ERROR] Payload data is missing or exceeds the maximum frame capacity.
+Active observation frame released from cache.
+
+# ./sentinel_payload_remediated crash_analysis/stack-buffer-underflow01.bin
+=== Sentinel-1 Scientific Payload Ingestion Subsystem ===
+[PAYLOAD ERROR] PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n
 ```
 
 sentinel_network
@@ -1552,11 +1718,10 @@ afl-fuzz -i seeds -o fuzz_out_remediated_asan_ubsan_run2 -m none -- ./sentinel_t
 
 sentinel_payload
 ```bash
+afl-fuzz -i seeds -o out/remediated -x sentinel_payload.dict -m none ./sentinel_payload_remediated @@
+```
 
-```
-```
-[Insert Screenshot: sentinel_telemetry AFL++ Status Screen]
-```
+![sentinel_payload AFL++ Status Screen](images/sentinel_payload/sentinel_payload_05_remediated.png)
 
 sentinel_network
 ```bash
