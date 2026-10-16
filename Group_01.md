@@ -634,7 +634,7 @@ A crafted stream_multiplier can trigger signed integer overflow and crash the te
 
 ---
 
-#### 4.2.7 `sentinel_payload` Vulnerability 1
+#### 4.2.5 Vulnerability 5
 
 | Field                  | Details |
 | :--------------------- | :------ |
@@ -738,7 +738,7 @@ The integer overflow and heap buffer overflow vulnerabilities can impact the ava
 
 ---
 
-#### 4.2.8 `sentinel_payload` Vulnerability 2
+#### 4.2.6 Vulnerability 6
 
 | Field                  | Details |
 | :--------------------- | :------ |
@@ -850,7 +850,7 @@ The heap use-after-free vulnerability can impact the integrity and availability 
 
 ---
 
-#### 4.2.9 `sentinel_payload` Vulnerability 3
+#### 4.2.7 Vulnerability 7
 
 | Field                  | Details |
 | :--------------------- | :------ |
@@ -953,7 +953,7 @@ The stack buffer overflow vulnerability can impact the confidentiality, integrit
 
 ---
 
-#### 4.2.10 `sentinel_payload` Vulnerability 4
+#### 4.2.8 Vulnerability 8
 
 | Field                  | Details |
 | :--------------------- | :------ |
@@ -1022,7 +1022,7 @@ The stack buffer underflow and format string vulnerabilities can impact the conf
 
 ---
 
-#### 4.2.11 Vulnerability 11
+#### 4.2.9 Vulnerability 9
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Stack Buffer Overflow in Telecommand Header Logging` |
@@ -1080,7 +1080,7 @@ The write overflow is of moderate severity due to stack protections. Overflowing
 
 ---
 
-#### 4.2.12 Vulnerability 12
+#### 4.2.10 Vulnerability 10
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Integer Underflow in Payload Size Calculation Leading to Heap Buffer Overflow` |
@@ -1114,7 +1114,7 @@ The exploitability of this vulnerability is limited to denial of service. The in
 
 ---
 
-#### 4.2.13 Vulnerability 13
+#### 4.2.11 Vulnerability 11
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Logical Flaw in Payload Size Calculation Leading to Heap Buffer Overflow` |
@@ -1151,7 +1151,7 @@ This vulnerability is considerably more exploitable than Vulnerability 12. Unlik
 
 ---
 
-#### 4.2.14 Vulnerability 14
+#### 4.2.12 Vulnerability 12
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Heap Use After Free and Double Free in Active Telecommands` |
@@ -1200,7 +1200,7 @@ READ of size 4 at 0xe5c00790 thread T0
 
 ---
 
-#### 4.2.15 Vulnerability 15
+#### 4.2.13 Vulnerability 13
 | Field | Details |
 | :--- | :--- |
 | **Vulnerability Name** | `Misaligned Packet Header Access on Unaligned Stream Offset` |
