@@ -1,7 +1,7 @@
 # IFN657 Assignment 2: Vulnerability Discovery
 
 **Group ID:** `Group_01`
-**Submission Date:** `[16 October 2026]`  
+**Submission Date:** `16 October 2026`  
 
 ### Team Members & Workload Distribution
 | Student Name | Student ID | Email Address | Assigned Subtasks / Roles | Contribution (%) |
@@ -323,6 +323,7 @@ Persistent mode (`__AFL_LOOP`) removes the cost of starting a new process for ea
 ### 3.3 AFL++ Status Console Screenshots
 
 sentinel_telemetry
+
 ![sentinel_telemetry AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_03_dict.jpg)
 ![sentinel_telemetry AFL++ Summary Stats](images/sentinel_telemetry/sentinel_telemetry_03_dict_summary.jpg)
 
@@ -346,7 +347,7 @@ sentinel_network
 ### 4.1 Crash Triage Methodology
 The same methodology was applied to all three targets. In the commands below, `{target}` is one of `telemetry`, `payload`, or `network`.
 
-#### 1. replay all crashes with the ASan build and save full logs
+#### 1. Replay all crashes with the ASan build and save full logs
 ```bash
 mkdir -p crash_logs
 for f in findings/*/crashes/id:*; do
@@ -356,7 +357,7 @@ for f in findings/*/crashes/id:*; do
 done
 ```
 
-#### 2. build a bucket key (error type + top 3 frames) for each crash
+#### 2. Build a bucket key (error type + top 3 frames) for each crash
 ```bash
 for log in crash_logs/*.log; do
   key=$(awk '
@@ -376,7 +377,7 @@ for log in crash_logs/*.log; do
 done > crash_buckets.tsv
 ```
 
-#### 3. count crashes per bucket, pick one representative crash and minimise it
+#### 3. Count crashes per bucket, pick one representative crash and minimise it
 ```bash
 mkdir -p crash_analysis
 declare -A num                                                   # per-error-type counter
@@ -395,10 +396,10 @@ awk -F'\t' '
   done
 ```
 
-#### 4. validate and inspect each representative crash
+#### 4. Validate and inspect each representative crash
 After minimisation, verify whether a valid minimised `.bin` file is produced and still reproduces the crash. Follow Step 4-1 if a valid minimised file is available; otherwise, follow Step 4-2 using the original representative crash.
 
-##### 4-1. inspect a successfully minimised representative
+##### 4-1. Inspect a successfully minimised representative
 ```bash
 ./sentinel_{target}_asan_ubsan crash_analysis/{name}.bin
 ```
@@ -409,14 +410,14 @@ If no valid minimised `.bin` file is produced, use the original representative c
 ./sentinel_{target}_asan_ubsan {original_representative_crash}
 ```
 
-#### 5. decode the input as a packet sequence (`network` only)
+#### 5. Decode the input as a packet sequence (`network` only)
 ```bash
 xxd crash_analysis/{name}.bin
 ```
 
-### 4.2 Discovered Vulnerabilities
-
 ---
+
+### 4.2 Discovered Vulnerabilities
 
 #### 4.2.1 Vulnerability 1
 | Field | Details |
@@ -1242,7 +1243,6 @@ The impact is limited to denial of service. This is undefined behavior (a misali
 ## 5. Task 4: Code Remediation
 
 ### 5.1 Proposed Code-Level Remediations
-*[Provide sound, robust C code fixes for every identified vulnerability. Explain how each fix prevents memory corruption without breaking legitimate parsing functionality.]*
 
 #### Patch for Vulnerability 1 (`sentinel_telemetry.c`):
 ```diff
@@ -1258,6 +1258,8 @@ The impact is limited to denial of service. This is undefined behavior (a misali
 The original `sprintf()` did not check the output length, allowing the formatted message to overflow the 64-byte `status_output` buffer and overwrite adjacent stack memory.
 
 `snprintf()` limits the output to the size of status_output. If the message is too long, it is truncated instead of overflowing the buffer.
+
+---
 
 #### Patch for Vulnerability 2 (`sentinel_telemetry.c`):
 ```c
@@ -1296,6 +1298,8 @@ The original code converted the result of `atoi()` directly to `size_t` without 
 
 The patch uses `strtol()` with input validation to reject invalid or oversized requests before memory allocation. The 1 MiB limit prevents excessive allocation, while valid requests such as `aux_buffer_request=128` remain supported. The allocated buffer is also freed after use.
 
+---
+
 #### Patch for Vulnerability 3 (`sentinel_telemetry.c`):
 ```diff
 - printf(event_message); 
@@ -1306,6 +1310,8 @@ The patch uses `strtol()` with input validation to reject invalid or oversized r
 The original `printf(event_message)` treated user-controlled input as a format string, allowing specifiers such as `%n` to cause unintended memory writes.
 
 Replacing it with `printf("%s", event_message)` treats the input as plain text instead of formatting instructions, preventing the format string vulnerability while preserving normal telemetry logging.
+
+---
 
 #### Patch for Vulnerability 4 (`sentinel_telemetry.c`):
 ```c
@@ -1492,6 +1498,8 @@ snprintf(header_summary, sizeof(header_summary), "Command Type: %d, Length: %d, 
 **Technical Justification:**
 `snprintf` bounds the write to `sizeof(header_summary)` and `%.*s` limits the read to `pkt->length`, preventing both the stack overflow and the over-read.
 
+---
+
 #### Patch for Vulnerability 10 (`sentinel_network.c`):
 ```c
 payload_size = pkt->length;
@@ -1499,12 +1507,16 @@ payload_size = pkt->length;
 **Technical Justification:**
 Using `pkt->length` directly (it already excludes the header) removes the subtraction that underflowed to a huge unsigned size.
 
+---
+
 #### Patch for Vulnerability 11 (`sentinel_network.c`):
 ```c
 payload_size = pkt->length;
 ```
 **Technical Justification:**
 Using `pkt->length` directly makes the allocated buffer size match the copied data size, removing the 8-byte heap overflow.
+
+---
 
 #### Patch for Vulnerability 12 (`sentinel_network.c`):
 ```c
@@ -1521,6 +1533,8 @@ void emergency_command_cleanup(void) {
 **Technical Justification:**
 Nulling each freed pointer and resetting the count makes repeated cleanup calls no-ops, preventing the use-after-free and double free.
 
+---
+
 #### Patch for Vulnerability 13 (`sentinel_network.c`):
 ```c
 typedef struct __attribute__((packed)) {
@@ -1532,6 +1546,8 @@ typedef struct __attribute__((packed)) {
 ```
 **Technical Justification:**
 `__attribute__((packed))` makes the compiler emit alignment-safe loads, so header fields can be read at any stream offset.
+
+---
 
 ### 5.2 Regression Verification & Fuzzing Proof
 
@@ -1714,6 +1730,7 @@ sentinel_telemetry
 ```bash
 afl-fuzz -i seeds -o fuzz_out_remediated_asan_ubsan_run2 -m none -- ./sentinel_telemetry_remediated_asan_ubsan @@
 ```
+
 ![sentinel_network AFL++ Status Screen](images/sentinel_telemetry/sentinel_telemetry_04_remediated.jpg)
 
 sentinel_payload
