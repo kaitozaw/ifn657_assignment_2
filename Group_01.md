@@ -1410,7 +1410,6 @@ Directive parsed: cal_factor_up=0.95
 [TELEMETRY LOG] CAL_FACTOR_cal_factor_up=0.950000
 Directive parsed: aux_bu44444444444444444444444444ff?r_request=
 Telemetry parsing complete. Processed entries: 3
-Exit code: 0
 
 # Vulnerability 2
 # ./sentinel_telemetry_remediated_asan_ubsan findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1
@@ -1421,16 +1420,15 @@ Directive parsed: r_up=0.95
 Invalid auxiliary buffer size.
 Directive parsed: aux_buffer_request=-2._buaux_buffer_request=-
 Telemetry parsing complete. Processed entries: 3
-Exit code: 0
 
 # Vulnerability 3
 # ./sentinel_telemetry_remediated_asan_ubsan findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16
 === Sentinel-1 Orbital Telemetry Processor ===
 Initialising telemetry stream parser...
 [TELEMETRY LOG] Invalid telemetry line syntax (missing '=' delimiter): s%nnsor_a_ba<nnsor_a_ba<20st2
+
 Directive parsed: cal_faq???????????quest=128
 Telemetry parsing complete. Processed entries: 1
-Exit code: 0
 
 # Vulnerability 4
 # ./sentinel_telemetry_remediated_asan_ubsan findings/persistent_refuzzing/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4
@@ -1442,7 +1440,6 @@ Directive parsed: tre=or_id_pry=101cal_factor_the=1.05
 Directive parsed: log_event=d
 Directive parsed: stream_multiplier=4444444444444444444444
 Telemetry parsing complete. Processed entries: 5
-Exit code: 0
 ```
 
 sentinel_payload
@@ -1804,6 +1801,7 @@ if __name__ == "__main__":
 python3 exploits/exploit.py
 echo 0 | sudo tee /proc/sys/kernel/randomize_va_space
 ./sentinel_network_original exploits/exploit.bin
+
 ```
 
 **Observed Terminal Output & Verification:**
