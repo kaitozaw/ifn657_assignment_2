@@ -667,7 +667,7 @@ The header line, `PAYLOAD_FRAME 1 1 1111111111111111111BBBBB1111 B`, is parsed b
 | `depth`        | `1111111111111111111` |
 | `label_buffer` | `BBBBB1111` |
 
-The value of `depth` is parsed as a 32-bit unsigned integer. However, 32-bit signed integers can only hold up to 4,294,967,295 values (i.e., 2^(32 - 1) values). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, a 32-bit system is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
+The value of `depth` is parsed as a 32-bit unsigned integer. However, 32-bit unsigned integers can only hold up to 4,294,967,295 values (i.e., 2^(32 - 1) values). As 1,111,111,111,111,111,111 is significantly larger than 4,294,967,295, a 32-bit system is forced to translate `1111111111111111111` into the maximum possible 32-bit unsigned integer value: `4294967295`.
 
 When the `malloc()` function is called on line 113, the `stream_data` variable of unsigned integer data type (i.e., `size_t`) is allocated memory of `4294967295 + 1`. This triggers an integer overflow and evaluates as `0`, causing the `fread()` function to trigger a heap buffer overflow when it attempts to store the 25-bytes read into a `NULL` pointer (i.e., `malloc(0)`).
 
@@ -1581,13 +1581,6 @@ Directive parsed: stream_multiplier=4444444444444444444444
 Telemetry parsing complete. Processed entries: 5
 Exit code: 0
 ```
-<<<<<<< HEAD
-
-sentinel_payload
-```bash
-# Demonstrate executing the patched binaries against all triggering crash inputs
-=======
->>>>>>> 8164aec (Completed Task 4: Code Remediation for sentinel_payload)
 
 sentinel_payload
 
