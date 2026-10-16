@@ -1542,7 +1542,7 @@ Read 0 bytes from payload observation stream.
 [PAYLOAD ERROR] Payload data is missing or exceeds the maximum frame capacity.
 Active observation frame released from cache.
 
-# ./sentinel_payload_remediated crash_analysis/stack-buffer-underflow01.bin
+# ./sentinel_payload_remediated crash_analysis/format-string-vulnerability01.bin
 === Sentinel-1 Scientific Payload Ingestion Subsystem ===
 [PAYLOAD ERROR] PAPLPAPLPAPLPAPLPAYL%nPAYL%nPAYL%nPAYL%n
 ```
