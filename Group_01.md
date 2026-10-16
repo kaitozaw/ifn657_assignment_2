@@ -388,7 +388,7 @@ cal_factor_up=0.95
 aux_bu44444444444444444444444444ff?r_request=128
 ```
 ```bash
-./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000000,sig:06,src:000002,time:28699,execs:917,op:havoc,rep:2"
+./sentinel_telemetry_asan_ubsan crash_analysis/stack-buffer-overflow01.bin
 ```
 
 **Root Cause Analysis:**
@@ -398,25 +398,18 @@ For crash `000000`, the first two telemetry directives are processed successfull
 
 **GDB / Sanitiser Evidence:**
 ```text
-ERROR: AddressSanitizer: stack-buffer-overflow
-WRITE of size 67
+# stack-buffer-overflow01.bin
 
-#0 ... in vsprintf
-#1 ... in sprintf
-#2 ... in process_telemetry_directive
-   sentinel_telemetry.c:100:5
-#3 ... in parse_telemetry_line
-   sentinel_telemetry.c:161
-#4 ... in parse_telemetry_stream
-   sentinel_telemetry.c:173
-#5 ... in main
-   sentinel_telemetry.c:200
+==29440==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xf6800750 at pc 0x5659881e bp 0xffffce58 sp 0xffffca24
+WRITE of size 67 at 0xf6800750 thread T0
+    #0 0x5659881d in vsprintf (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0x4381d)
+    #1 0x5659973c in sprintf (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0x4473c)
+    #2 0x5665f78c in process_telemetry_directive /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:100:5
 
-This frame has 3 object(s):
-  [16, 80)   'formatted_key'
-  [112, 240) 'formatted_value'
-  [272, 336) 'status_output'
-               <--- Memory access at offset 336 overflows this variable
+Address 0xf6800750 is located in stack of thread T0 at offset 336 in frame
+    #0 0x5665dbb7 in process_telemetry_directive /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:64
+
+    [272, 336) 'status_output' (line 67) <== Memory access at offset 336 overflows this variable
 ```
 
 **Exploitability Assessment:**
@@ -440,7 +433,7 @@ r_up=0.95
 aux_buffer_request=-2.\_buaux_buffer_request=-28
 ```
 ```bash
-./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000018,sig:06,src:000068,time:561182,execs:25460,op:havoc,rep:1"
+./sentinel_telemetry_asan_ubsan crash_analysis/requested01.bin
 ```
 **Root Cause Analysis:**
 The `aux_buffer_request` value is converted with `atoi()` and cast directly to `size_t` without checking whether the requested size is within an acceptable range:
@@ -456,22 +449,12 @@ The resulting size is passed directly to `malloc()` in `allocate_auxiliary_buffe
 
 **GDB / Sanitiser Evidence:**
 ```text
-ERROR: AddressSanitizer: requested allocation size
-0xfffffffe ... exceeds maximum supported size of 0xc0000000
+# requested01.bin
 
-#0 ... in malloc
-#1 ... in allocate_auxiliary_buffer
-   sentinel_telemetry.c:55:28
-#2 ... in process_telemetry_directive
-   sentinel_telemetry.c:94:21
-#3 ... in parse_telemetry_line
-   sentinel_telemetry.c:161
-#4 ... in parse_telemetry_stream
-   sentinel_telemetry.c:173
-#5 ... in main
-   sentinel_telemetry.c:200
-
-SUMMARY: AddressSanitizer: allocation-size-too-big ... in malloc
+==29466==ERROR: AddressSanitizer: requested allocation size 0xfffffffe (0x800 after adjustments for alignment, red zones etc.) exceeds maximum supported size of 0xc0000000 (thread T0)
+    #0 0x56613b81 in malloc (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0xbeb81)
+    #1 0x5665dabe in allocate_auxiliary_buffer /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:55:28
+    #2 0x5665f6d1 in process_telemetry_directive /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:94:21
 ```
 
 **Exploitability Assessment:**
@@ -494,7 +477,7 @@ s%nnsor_a_ba\<nnsor_a_ba<20st2
 cal_faq???????????quest=128
 ```
 ```bash
-./sentinel_telemetry_asan_ubsan "findings/asan_ubsan/crashes/id:000015,sig:11,src:000027,time:361247,execs:13890,op:havoc,rep:16"
+./sentinel_telemetry_asan_ubsan crash_analysis/format-string01.bin
 ```
 **Root Cause Analysis:**
 When a telemetry line does not contain an `=` delimiter, `parse_telemetry_line()` constructs an error message containing the invalid input and passes it to `log_telemetry_event()`:
@@ -516,25 +499,15 @@ The root cause is the use of externally controlled input as a format string, cla
 
 **GDB / Sanitiser Evidence:**
 ```text
-AddressSanitizer:DEADLYSIGNAL
+# format-string01.bin
 
-ERROR: AddressSanitizer: SEGV on unknown address
-The signal is caused by a WRITE memory access.
-
-#0 ... in libc.so.6
-#1 ... in libc.so.6
-#2 ... in vprintf
-#3 ... in printf
-#4 ... in log_telemetry_event
-   sentinel_telemetry.c:43:5
-#5 ... in parse_telemetry_line
-   sentinel_telemetry.c:137:9
-#6 ... in parse_telemetry_stream
-   sentinel_telemetry.c:173
-#7 ... in main
-   sentinel_telemetry.c:200
-
-SUMMARY: AddressSanitizer: SEGV ... in libc.so.6
+==29482==ERROR: AddressSanitizer: SEGV on unknown address 0x5667b720 (pc 0xf7c4c8b0 bp 0xf6900049 sp 0xffffc990 T0)
+==29482==The signal is caused by a WRITE memory access.
+    #0 0xf7c4c8b0  (/usr/lib32/libc.so.6+0x668b0)
+    #1 0xf7c4d2bc  (/usr/lib32/libc.so.6+0x672bc)
+    #2 0xf7c5fca3 in vprintf (/usr/lib32/libc.so.6+0x79ca3)
+    #3 0x565995b0 in printf (/home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry_asan_ubsan+0x445b0)
+    #4 0x5665d981 in log_telemetry_event /home/clairelin.guest/IFN657-A2/ifn657_assignment_2/sentinel_telemetry/sentinel_telemetry.c:43:5
 ```
 
 **Exploitability Assessment:**
@@ -560,7 +533,7 @@ log_event=d
 stream_multiplier=4444444444444444444444
 ```
 ```bash
-./sentinel_telemetry_remediated_asan_ubsan "findings/persistent_refuzzing/id:000000,sig:04,src:000003,time:86084,execs:54757,op:havoc,rep:4"
+./sentinel_telemetry_remediated_asan_ubsan crash_analysis/integer-overflow01.bin
 ```
 
 **Root Cause Analysis:**
@@ -568,19 +541,14 @@ The stream_multiplier value is converted using atoi() without range validation. 
 
 **GDB / Sanitiser Evidence:**
 ```text
+# integer-overflow01.bin
+
 Program received signal SIGILL, Illegal instruction.
 
-#0 calculate_stream_buffer_size
-   (num_channels=4, sample_rate=2147483647)
-   at sentinel_telemetry_remediated.c:55
-
-55 size_t stream_bandwidth = num_channels * sample_rate;
-
-#1 process_telemetry_directive
-   at sentinel_telemetry_remediated.c:88
-
-#2 parse_telemetry_line
-   at sentinel_telemetry_remediated.c:199
+#0 calculate_stream_buffer_size (num_channels=4, sample_rate=2147483647) at sentinel_telemetry_remediated.c:55
+55      size_t stream_bandwidth = num_channels * sample_rate;
+#1 process_telemetry_directive at sentinel_telemetry_remediated.c:88
+#2 parse_telemetry_line at sentinel_telemetry_remediated.c:199
 ```
 
 **Exploitability Assessment:**
